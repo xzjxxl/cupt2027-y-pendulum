@@ -8,7 +8,7 @@ const BOB_M = 0.040;          // 摆球质量 / kg
 const DEG = Math.PI / 180;
 
 // ------------------------------------------------------------------ 物理
-const P = { d: 0.300, L: 0.3808, l: 0.450, gam: 0.03,
+const P = { d: 0.39950, L: 0.320, l: 0.200, gam: 0.03,
             th0: 9, ph0: 9 };
 const S = { th: 0, ph: 0, thd: 0, phd: 0, t: 0, running: true };
 
@@ -333,17 +333,19 @@ function refreshReadout() {
   const h = hOf(P.L, P.d);
   const b = betaOf(h, P.l);
   const [Tx, Ty] = periods(h, P.l);
-  const tc = 4 * Tx;
   const crit = thetaCrit(h, P.d) / DEG;
+  // 准静态张力：T3 = m g cos(theta)。真实摆动还要加 l*theta_dot^2，会更大。
   const [T1, T2] = tensions(S.th, h, P.l, P.d);
   const [btxt, exact] = ratioText(b);
+  const m = /^(\d+)\s*:\s*(\d+)$/.exec(btxt);
+  const tc = m ? Number(m[1]) * Tx : null;   // 3:2 -> 3*T_x
 
   el('o-h').textContent = (h * 100).toFixed(2) + ' cm';
   el('o-b').textContent = btxt;
   el('o-b').style.color = exact ? 'var(--accent-b)' : 'var(--accent-a)';
   el('o-tx').textContent = Tx.toFixed(4) + ' s';
   el('o-ty').textContent = Ty.toFixed(4) + ' s';
-  el('o-tc').textContent = (4 * Tx).toFixed(4) + ' s';
+  el('o-tc').textContent = tc ? tc.toFixed(4) + ' s' : '无公共周期';
   el('o-crit').textContent = crit.toFixed(1) + '°';
   el('o-t1').textContent = (T1 / (BOB_M * G)).toFixed(2) + ' mg';
   el('o-t2').textContent = (T2 / (BOB_M * G)).toFixed(2) + ' mg';
@@ -399,20 +401,21 @@ function setSlider(id, value) {
 document.querySelectorAll('[data-preset]').forEach((b) => {
   b.addEventListener('click', () => {
     const k = b.dataset.preset;
-    if (k === '43') {
-      setSlider('s-d', 30); setSlider('s-L', 38.08); setSlider('s-l', 45);
+    // 全部按 L = 32 cm、l = 20 cm 的实物来；比例靠改 d 或 l 得到
+    if (k === '32') {                       // 当前设计点
+      setSlider('s-d', 39.95); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 9); setSlider('s-ph', 9);
-    } else if (k === '21') {
-      setSlider('s-d', 30); setSlider('s-L', 33.54); setSlider('s-l', 10);
+    } else if (k === '21') {                // 下绳缩短到 9.42 cm
+      setSlider('s-d', 30); setSlider('s-L', 32); setSlider('s-l', 9.42);
       setSlider('s-th', 8); setSlider('s-ph', 8);
-    } else if (k === '54') {
-      setSlider('s-d', 30); setSlider('s-L', 38.08); setSlider('s-l', 20.6);
+    } else if (k === '54') {                // 拉开悬点间距
+      setSlider('s-d', 59.92); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 9); setSlider('s-ph', 9);
-    } else if (k === 'crit') {
-      setSlider('s-d', 30); setSlider('s-L', 38.08); setSlider('s-l', 45);
-      setSlider('s-th', 26); setSlider('s-ph', 2);
-    } else if (k === 'irr') {
-      setSlider('s-d', 30); setSlider('s-L', 38.08); setSlider('s-l', 27.5);
+    } else if (k === 'crit') {              // 越过 38.6 度松绳临界
+      setSlider('s-d', 39.95); setSlider('s-L', 32); setSlider('s-l', 20);
+      setSlider('s-th', 42); setSlider('s-ph', 2);
+    } else if (k === 'irr') {               // beta = sqrt(2)
+      setSlider('s-d', 49.96); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 9); setSlider('s-ph', 9);
     }
     release(); S.running = true;

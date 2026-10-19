@@ -110,8 +110,8 @@
   <div><span>T 面外</span><b id="o-ty">—</b></div>
   <div><span>公共周期</span><b id="o-tc">—</b></div>
   <div><span>松绳临界</span><b id="o-crit">—</b></div>
-  <div><span>上绳 T1</span><b id="o-t1">—</b></div>
-  <div><span>上绳 T2</span><b id="o-t2">—</b></div>
+  <div><span>上绳 T1（准静态）</span><b id="o-t1">—</b></div>
+  <div><span>上绳 T2（准静态）</span><b id="o-t2">—</b></div>
 </div>
 
 <div class="btnrow">
@@ -120,7 +120,7 @@
   <button type="button" id="btn-clear">清轨迹</button>
 </div>
 <div class="btnrow">
-  <button type="button" data-preset="43">4 : 3 标准</button>
+  <button type="button" data-preset="32">3 : 2 标准</button>
   <button type="button" data-preset="21">2 : 1</button>
   <button type="button" data-preset="54">5 : 4</button>
   <button type="button" data-preset="crit">松绳临界</button>
@@ -130,23 +130,23 @@
 <div class="ctrls">
   <div class="ctrl">
     <label>悬点间距 d <span id="v-d">30.00 cm</span></label>
-    <input type="range" id="s-d" min="10" max="40" step="0.01" value="30">
+    <input type="range" id="s-d" min="10" max="60" step="0.01" value="39.95">
   </div>
   <div class="ctrl">
     <label>上绳 L <span id="v-L">38.08 cm</span></label>
-    <input type="range" id="s-L" min="26" max="46" step="0.01" value="38.08">
+    <input type="range" id="s-L" min="22" max="45" step="0.01" value="32">
   </div>
   <div class="ctrl">
     <label>下绳 l <span id="v-l">45.00 cm</span></label>
-    <input type="range" id="s-l" min="6" max="50" step="0.01" value="45">
+    <input type="range" id="s-l" min="6" max="40" step="0.01" value="20">
   </div>
   <div class="ctrl">
     <label>面内初角 θ₀ <span id="v-th0">9.0°</span></label>
-    <input type="range" id="s-th" min="0.5" max="26" step="0.1" value="9">
+    <input type="range" id="s-th" min="0.5" max="50" step="0.1" value="9">
   </div>
   <div class="ctrl">
     <label>面外初角 φ₀ <span id="v-ph0">9.0°</span></label>
-    <input type="range" id="s-ph" min="0.5" max="26" step="0.1" value="9">
+    <input type="range" id="s-ph" min="0.5" max="50" step="0.1" value="9">
   </div>
   <div class="ctrl">
     <label>阻尼 γ <span id="v-gam">0.03 s⁻¹</span></label>
@@ -155,8 +155,9 @@
 </div>
 
 <p class="tip">
-  默认是报告里的 4:3 工况（d = 30 cm，L = 38.08 cm，h = 35 cm，l = 45 cm）。
-  把 l 拉到 11.7 cm 变成 2:1；θ₀ 拉到 23.2° 以上，一侧上绳张力归零，即报告 3.5 节的松绳判据。
+  默认是 3:2 设计点：d = 39.95 cm、L = 32.00 cm、l = 20.00 cm，得 h = 25.00 cm、β = 1.5。
+  把 θ₀ 拉到 38.6° 以上，一侧上绳张力归零，即报告 3.5 节的松绳判据。
+  张力读数按准静态算（T3 = mg cosθ）；实际摆动中 T3 = m(g cosθ + lθ̇²) 更大，松绳会更晚。
   完整对比动画在 <a href="index.html">总目录</a>。
 </p>
 
