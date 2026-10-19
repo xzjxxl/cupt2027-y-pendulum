@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex, nofollow">
 <title>阻尼与图形演化 - Y形摆 · 鲍迪奇摆 · 三维仿真动画</title>
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="stylesheet" href="style.css">
@@ -18,12 +20,12 @@
 <p class="sub">三种耗散机制，三种收缩方式</p>
 <p class="intro">各向同性阻尼只缩不改形；各向异性会把绸带挤成斜线；平方阻尼先快后慢。</p>
 <button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
+<p class="fallback">画面不动就点上面的按钮；仍不行，点微信右上角 ··· 用浏览器打开。</p>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
   <div class="player">
-    <video src="video/e1_damping.mp4" poster="video/e1_damping.jpg" autoplay muted loop playsinline preload="metadata"></video>
-    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <video src="video/e1_damping.mp4" poster="video/e1_damping.jpg" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="三种阻尼对比"></video>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">各向同性 / 各向异性 / 平方阻尼</p>
@@ -36,8 +38,7 @@
 </article>
 <article class="card clip-card">
   <div class="player">
-    <video src="video/e2_qfactor.mp4" poster="video/e2_qfactor.jpg" autoplay muted loop playsinline preload="metadata"></video>
-    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <video src="video/e2_qfactor.mp4" poster="video/e2_qfactor.jpg" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="品质因数与衰减包络"></video>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">Q 决定图形能撑多少个公共周期</p>

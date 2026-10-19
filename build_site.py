@@ -156,6 +156,8 @@ a:focus-visible, button:focus-visible {
   overflow-wrap: anywhere;
 }
 .masthead .sub { margin: 0; color: var(--muted); font-size: 15px; }
+.masthead .note { margin: 8px 0 0; color: #7f8a99; font-size: 13px;
+  line-height: 1.5; border-left: 2px solid #2b3542; padding-left: 10px; }
 
 /* group page header */
 .topnav { margin: 0 0 14px; }
@@ -315,6 +317,8 @@ a:focus-visible, button:focus-visible {
 .labcard .badge { background: var(--accent-a); color: #08111a; }
 .labcard .count { color: var(--accent-a); font-size: 20px; }
 .playall.done { background: #2a323d; color: var(--text); }
+.fallback { margin: -8px 0 16px; color: #7f8a99; font-size: 12.5px;
+  line-height: 1.5; }
 """
 
 
@@ -341,6 +345,8 @@ def page(title: str, body: str, script: str = "") -> str:
 <meta charset="utf-8">
 {VIEWPORT_TAG}
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex, nofollow">
 <title>{esc(title)}</title>
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="stylesheet" href="style.css">
@@ -393,6 +399,8 @@ def build_index(catalog: dict) -> str:
         '<header class="masthead">',
         f'<h1>{esc(project)}</h1>',
         f'<p class="sub">{esc(catalog.get("subtitle", ""))}</p>',
+        '<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，'
+        '不是实测结果；实测数据待补。</p>',
         '</header>',
         '<nav class="grid groups">',
         "\n".join(cards),
@@ -411,8 +419,7 @@ def clip_card_html(clip: dict) -> str:
     note = esc(clip.get("note", ""))
     return f'''<article class="card clip-card">
   <div class="player">
-    <video src="{src}" poster="{poster}" autoplay muted loop playsinline preload="metadata"></video>
-    <button class="fs" type="button" aria-label="Fullscreen">{FULLSCREEN_ICON}</button>
+    <video src="{src}" poster="{poster}" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="{title}"></video>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">{note}</p>
@@ -440,6 +447,8 @@ def build_group(catalog: dict, group: dict) -> str:
         f'<p class="intro">{esc(group.get("intro", ""))}</p>',
         ('<button class="playall" id="playall" type="button" hidden>'
          'TAP TO PLAY ALL / \u5168\u90e8\u64ad\u653e</button>'),
+        ('<p class="fallback">画面不动就点上面的按钮；仍不行，点微信右上角 '
+         '\u00b7\u00b7\u00b7 \u7528\u6d4f\u89c8\u5668\u6253\u5f00\u3002</p>'),
         '</header>',
         '<section class="grid clips">',
         "\n".join(clip_cards),

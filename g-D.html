@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex, nofollow">
 <title>悬点间距扫描 - Y形摆 · 鲍迪奇摆 · 三维仿真动画</title>
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="stylesheet" href="style.css">
@@ -18,12 +20,12 @@
 <p class="sub">拧丝杆改变 d，频率比跟着走</p>
 <p class="intro">固定上下绳长，只改实际挂点间距：d 变大，结点上移，β 下降。</p>
 <button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
+<p class="fallback">画面不动就点上面的按钮；仍不行，点微信右上角 ··· 用浏览器打开。</p>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
   <div class="player">
-    <video src="video/d1_scan.mp4" poster="video/d1_scan.jpg" autoplay muted loop playsinline preload="metadata"></video>
-    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <video src="video/d1_scan.mp4" poster="video/d1_scan.jpg" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="三台装置同步摆动"></video>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">d = 20 / 30 / 40 cm</p>
@@ -36,8 +38,7 @@
 </article>
 <article class="card clip-card">
   <div class="player">
-    <video src="video/d2_beta_curve.mp4" poster="video/d2_beta_curve.jpg" autoplay muted loop playsinline preload="metadata"></video>
-    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <video src="video/d2_beta_curve.mp4" poster="video/d2_beta_curve.jpg" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="β–d 曲线"></video>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">工作点与斜率；模型的实测用法</p>
