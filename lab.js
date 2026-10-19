@@ -486,8 +486,8 @@ document.querySelectorAll('[data-preset]').forEach((b) => {
     } else if (k === 'rich') {
       // 复现实拍那种"铺满的花瓣"：比例只差一点点，轨迹才不闭合、
       // 一圈圈往外挪，把整个椭圆填成网状
-      setSlider('s-d', 40.35); setSlider('s-L', 32); setSlider('s-l', 20);
-      setSlider('s-th', 17); setSlider('s-ph', 17);
+      setSlider('s-d', 42.6); setSlider('s-L', 32); setSlider('s-l', 20);
+      setSlider('s-th', 18); setSlider('s-ph', 18);
     } else if (k === 'irr') {               // beta = sqrt(2)
       setSlider('s-d', 49.96); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 9); setSlider('s-ph', 9);
@@ -508,6 +508,83 @@ let last = performance.now();
 let acc = 0;
 const FIXED = 1 / 480;
 let frameCount = 0;
+
+// ---- 轨迹投影：把摆球位置投到二维平面，画成李萨如图
+(function projView() {
+  const el = document.getElementById('c2d');
+  const btn = document.getElementById('btn-trail');
+  if (!el || !btn) return;
+  const g = el.getContext('2d');
+  const pts = [];
+  let on = false;
+
+  function size() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    el.width = Math.max(2, Math.round(stage.clientWidth * dpr));
+    el.height = Math.max(2, Math.round(stage.clientHeight * dpr));
+  }
+
+  function draw() {
+    const w = el.width, h = el.height;
+    const dpr = w / Math.max(1, stage.clientWidth);
+    g.clearRect(0, 0, w, h);
+
+    const hh = hOf(P.L, P.d), l = P.l;
+    // 关键：经典李萨如图是「水平面俯视」x–y，不是侧视 x–z。
+    // 侧视时摆球上下只动 1 cm，会被压成一条扁带。
+    const xm = Math.max(l, (hh + l) * 0.62) * 1.18;
+    const sc = Math.min(w, h) / (2 * xm) * 0.94;
+    const cx = w / 2, cy = h / 2;
+
+    // 十字参考
+    g.strokeStyle = 'rgba(255,255,255,.07)';
+    g.lineWidth = 1 * dpr;
+    g.beginPath(); g.moveTo(0, cy); g.lineTo(w, cy);
+    g.moveTo(cx, 0); g.lineTo(cx, h); g.stroke();
+
+    if (pts.length > 1) {
+      g.strokeStyle = 'rgba(53,199,216,.85)';
+      g.lineWidth = 1.5 * dpr;
+      g.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const sx = cx + pts[i][0] * sc;
+        const sy = cy - pts[i][1] * sc;
+        if (i === 0) g.moveTo(sx, sy); else g.lineTo(sx, sy);
+      }
+      g.stroke();
+    }
+    // 当前光点
+    if (pts.length) {
+      const q = pts[pts.length - 1];
+      g.fillStyle = '#7CF5A8';
+      g.beginPath();
+      g.arc(cx + q[0] * sc, cy - q[1] * sc, 3.2 * dpr, 0, 6.3);
+      g.fill();
+    }
+    g.fillStyle = 'rgba(255,255,255,.34)';
+    g.font = (11 * dpr) + 'px system-ui, sans-serif';
+    g.fillText('轨迹投影 · 水平面俯视 x–y', 14 * dpr, 20 * dpr);
+  }
+
+  btn.addEventListener('click', () => {
+    on = !on;
+    el.style.display = on ? 'block' : 'none';
+    canvas.style.visibility = on ? 'hidden' : 'visible';
+    btn.classList.toggle('on', on);
+    if (on) { size(); }
+  });
+  window.addEventListener('resize', () => { if (on) size(); });
+  window.__projTick = function () {
+    if (!on) return;
+    const hh = hOf(P.L, P.d), l = P.l;
+    // x 沿横梁、y 垂直横梁 —— 两个水平坐标，这才是李萨如图所在的平面
+    const x = l * Math.sin(S.th);
+    const y = (hh + l * Math.cos(S.th)) * Math.sin(S.ph);
+    pts.push([x, y]);
+    if (pts.length > 6000) pts.shift();
+    draw();
+  };
+})();
 
 // ---- Canvas2D 侧视图（WebGL 不可用时的完整替代品）
 const trail2d = [];
@@ -603,6 +680,7 @@ function loop(now) {
   frameCount++;
   if (!USE2D && S.running && frameCount % 2 === 0) pushTrail(curPose.B);
   if (frameCount % 6 === 0) refreshReadout();
+  if (window.__projTick) window.__projTick();
   if (USE2D) { draw2d(); } else { renderer.render(scene, camera); }
 }
 requestAnimationFrame(loop);

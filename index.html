@@ -25,6 +25,8 @@
     overflow: hidden;
     background: #000;
   }
+  #c2d { position: absolute; inset: 0; width: 100%; height: 100%;
+         display: none; }
   #c3d { display: block; width: 100%; height: 100%;
          touch-action: none; cursor: grab; }
   .hint {
@@ -103,11 +105,13 @@
 
 <div class="stage" id="stage">
   <canvas id="c3d"></canvas>
+  <canvas id="c2d"></canvas>
   <div class="lab-badge" id="warn">⚠ 摆角已超过松绳临界：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
   <div class="viewbtns">
     <button type="button" data-view="iso">斜视</button>
     <button type="button" data-view="front">正视</button>
     <button type="button" data-view="top">俯视</button>
+      <button type="button" id="btn-trail">轨迹投影</button>
   </div>
   <div class="hint">拖动旋转 · 滚轮/双指缩放</div>
 </div>
