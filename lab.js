@@ -75,9 +75,30 @@ function poseOf() {
 // ------------------------------------------------------------------ 场景
 const canvas = document.getElementById('c3d');
 const stage = document.getElementById('stage');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-renderer.setClearColor(0x000000, 1);
+// 有些手机内核（尤其微信 X5）拿不到 WebGL 上下文，抛错会让整段脚本停摆，
+// 于是画面全黑、读数全空。这里改成：拿不到 WebGL 就降级到 Canvas2D 侧视图，
+// 物理、读数、滑块一律照常工作。
+let renderer = null;
+let USE2D = false;
+let ctx2d = null;
+const FORCE_2D = new URLSearchParams(location.search).get('mode') === '2d';
+if (FORCE_2D) {
+  USE2D = true;
+  ctx2d = canvas.getContext('2d');
+  stage.setAttribute('data-mode', '2d');
+  window.__lab2d = true;
+}
+try {
+  if (USE2D) { throw new Error('forced 2d'); }
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 1);
+} catch (err) {
+  USE2D = true;
+  ctx2d = canvas.getContext('2d');
+  stage.setAttribute('data-mode', '2d');
+  window.__lab2d = true;
+}
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(38, 1, 0.02, 20);
@@ -285,6 +306,24 @@ function applyCam() {
   }, { passive: false });
 })();
 
+// 万一 3D 是黑屏，给用户一个自己切换的出口
+(function modeToggle() {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.style.cssText = 'position:absolute;left:10px;top:10px;z-index:5;' +
+    'padding:5px 10px;border-radius:999px;font-size:12px;' +
+    'background:rgba(0,0,0,.55);color:#9BA9BC;' +
+    'border:1px solid #2A3542;cursor:pointer';
+  b.textContent = USE2D ? '切回 3D' : '画面不动？切 2D';
+  b.addEventListener('click', () => {
+    const u = new URL(location.href);
+    if (USE2D) { u.searchParams.delete('mode'); }
+    else { u.searchParams.set('mode', '2d'); }
+    location.href = u.toString();
+  });
+  stage.appendChild(b);
+})();
+
 document.querySelectorAll('[data-view]').forEach((b) => {
   b.addEventListener('click', () => {
     Object.assign(orb, VIEWS[b.dataset.view]);
@@ -294,7 +333,14 @@ document.querySelectorAll('[data-view]').forEach((b) => {
 
 // ------------------------------------------------------------------ 尺寸
 function resize() {
-  const w = stage.clientWidth, hgt = stage.clientHeight;
+  const w = Math.max(2, stage.clientWidth);
+  const hgt = Math.max(60, stage.clientHeight);
+  if (USE2D) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(2, Math.round(w * dpr));
+    canvas.height = Math.max(2, Math.round(hgt * dpr));
+    return;
+  }
   renderer.setSize(w, hgt, false);
   camera.aspect = w / hgt;
   camera.updateProjectionMatrix();
@@ -458,6 +504,82 @@ let acc = 0;
 const FIXED = 1 / 480;
 let frameCount = 0;
 
+// ---- Canvas2D 侧视图（WebGL 不可用时的完整替代品）
+const trail2d = [];
+function draw2d() {
+  if (!ctx2d) return;
+  const w = canvas.width, h = canvas.height;
+  const dpr = w / Math.max(1, stage.clientWidth);
+  ctx2d.setTransform(1, 0, 0, 1, 0, 0);
+  ctx2d.fillStyle = '#000';
+  ctx2d.fillRect(0, 0, w, h);
+
+  const hh = hOf(P.L, P.d), l = P.l;
+  const spanX = Math.max(P.d * 1.25, 0.30);
+  const spanZ = (hh + l) * 1.35;
+  const S0 = Math.min(w / spanX, h / spanZ) * 0.86;
+  const cx = w / 2;
+  const ytop = h * 0.14;
+  const px = (x) => cx + x * S0;
+  const py = (z) => ytop + z * S0;
+
+  const th = S.th, ph = S.ph;
+  const bx = l * Math.sin(th);
+  const bz = (hh + l * Math.cos(th)) * Math.cos(ph);
+
+  // 横梁与两个挂点
+  ctx2d.strokeStyle = '#6E7A88';
+  ctx2d.lineWidth = 3 * dpr;
+  ctx2d.beginPath();
+  ctx2d.moveTo(px(-P.d / 2) - 26 * dpr, py(0));
+  ctx2d.lineTo(px(P.d / 2) + 26 * dpr, py(0));
+  ctx2d.stroke();
+  ctx2d.fillStyle = '#C8A24A';
+  for (const sx of [-1, 1]) {
+    const x = sx * P.d / 2;
+    ctx2d.fillRect(px(x) - 11 * dpr, py(0) - 7 * dpr, 22 * dpr, 14 * dpr);
+  }
+  // 两条上绳 + 结点
+  ctx2d.strokeStyle = '#D8E0EA';
+  ctx2d.lineWidth = 1.6 * dpr;
+  for (const sx of [-1, 1]) {
+    ctx2d.beginPath();
+    ctx2d.moveTo(px(sx * P.d / 2), py(0));
+    ctx2d.lineTo(px(0), py(hh));
+    ctx2d.stroke();
+  }
+  ctx2d.fillStyle = '#F2C14E';
+  ctx2d.beginPath();
+  ctx2d.arc(px(0), py(hh), 3.4 * dpr, 0, Math.PI * 2);
+  ctx2d.fill();
+  // 下绳 + 摆球
+  ctx2d.strokeStyle = '#D8E0EA';
+  ctx2d.beginPath();
+  ctx2d.moveTo(px(0), py(hh));
+  ctx2d.lineTo(px(bx), py(bz));
+  ctx2d.stroke();
+  ctx2d.fillStyle = '#E8EEF6';
+  ctx2d.beginPath();
+  ctx2d.arc(px(bx), py(bz), 7 * dpr, 0, Math.PI * 2);
+  ctx2d.fill();
+  // 轨迹
+  trail2d.push([px(bx), py(bz)]);
+  if (trail2d.length > 420) trail2d.shift();
+  if (trail2d.length > 2) {
+    ctx2d.strokeStyle = 'rgba(53,199,216,.85)';
+    ctx2d.lineWidth = 1.6 * dpr;
+    ctx2d.beginPath();
+    ctx2d.moveTo(trail2d[0][0], trail2d[0][1]);
+    for (const q of trail2d) ctx2d.lineTo(q[0], q[1]);
+    ctx2d.stroke();
+  }
+  // 角标
+  ctx2d.fillStyle = '#6E7C8F';
+  ctx2d.font = (11 * dpr) + 'px system-ui, sans-serif';
+  ctx2d.fillText('2D 兼容模式（本机浏览器不支持 WebGL）',
+                 14 * dpr, h - 14 * dpr);
+}
+
 function loop(now) {
   requestAnimationFrame(loop);
   const dtWall = Math.min((now - last) / 1000, 0.05);
@@ -474,9 +596,9 @@ function loop(now) {
   }
   updateRig();
   frameCount++;
-  if (S.running && frameCount % 2 === 0) pushTrail(curPose.B);
+  if (!USE2D && S.running && frameCount % 2 === 0) pushTrail(curPose.B);
   if (frameCount % 6 === 0) refreshReadout();
-  renderer.render(scene, camera);
+  if (USE2D) { draw2d(); } else { renderer.render(scene, camera); }
 }
 requestAnimationFrame(loop);
 window.__lab_ok = true;

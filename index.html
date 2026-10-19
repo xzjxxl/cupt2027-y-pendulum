@@ -197,7 +197,7 @@
   (function () {
     function fallback(msg) {
       var st = document.getElementById('stage');
-      if (!st || window.__lab_ok) { return; }
+      if (!st || window.__lab_ok || window.__lab2d) { return; }
       st.innerHTML =
         '<div class="nolab">' +
         '<img class="nolab-pic" src="video/a1_apparatus.jpg" alt="装置静帧">' +
@@ -214,7 +214,7 @@
     });
     // 看门狗：6 秒还没画出一帧，就当作失败
     setTimeout(function () {
-      if (window.__lab_ok) { return; }
+      if (window.__lab_ok || window.__lab2d) { return; }
       var c = document.getElementById('c3d');
       var ok = false;
       try {
