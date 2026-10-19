@@ -796,7 +796,7 @@ def build_index(catalog: dict) -> str:
         f'<p class="sub">{esc(catalog.get("subtitle", ""))}</p>',
         '</header>',
         lab_body,
-        '<section class="gallery-head">',
+        '<section class="gallery-head" id="gallery">',
         '<h2>八个分类</h2>',
         f'<p>{sum(len(g.get("clips", [])) for g in catalog.get("groups", []))}'
         ' 段动画，按类分组；点进去同类的几段会在同一屏上同时播放。</p>',

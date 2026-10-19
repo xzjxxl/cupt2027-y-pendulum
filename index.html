@@ -83,6 +83,9 @@
   .btnrow button.primary { background: var(--accent-a); color: #08111a; border-color: transparent; font-weight: 600; }
   .btnrow button:active { transform: scale(.98); }
   .tip { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 10px 0 0; }
+  .nolab-pic { display:block; width:100%; max-width:520px;
+    margin:0 auto 12px; border-radius:10px; }
+  .nolab-msg { color:#6E7C8F; font-size:12px; }
   .nolab { padding: 18px; color: #ff8a8a; }
 </style><link rel="stylesheet" href="style.css">
 </head>
@@ -168,7 +171,7 @@
 
 <footer class="site-footer"><p>Y 形摆 · 鲍迪奇摆 · 交互实验台 · CUPT 2027 Problem 5</p></footer>
 
-<section class="gallery-head">
+<section class="gallery-head" id="gallery">
 <h2>八个分类</h2>
 <p>22 段动画，按类分组；点进去同类的几段会在同一屏上同时播放。</p>
 <p class="quicknav">
@@ -190,16 +193,36 @@
 </main>
 <script type="module" src="lab.js"></script>
 <script>
-  // 若模块/WebGL 起不来，给一块可读的退路
-  window.addEventListener('error', function (e) {
-    var s = document.getElementById('stage');
-    if (s && !window.__lab_ok) {
-      var msg = (e && (e.message || (e.error && e.error.message))) || 'unknown';
-      s.innerHTML = '<div class="nolab">3D 没能启动：<br>' +
-        String(msg) + '<br><br>可以先回 <a href="index.html">总目录</a> 看录好的动画。</div>';
-      s.setAttribute('data-err', String(msg));
+  // 3D 起不来时的退路：换成静图 + 明确的下一步，绝不留下黑框
+  (function () {
+    function fallback(msg) {
+      var st = document.getElementById('stage');
+      if (!st || window.__lab_ok) { return; }
+      st.innerHTML =
+        '<div class="nolab">' +
+        '<img class="nolab-pic" src="video/a1_apparatus.jpg" alt="装置静帧">' +
+        '<p><strong>这台设备的浏览器没能启动 3D。</strong><br>' +
+        '常见原因：微信内核限制了 WebGL，或脚本被拦截。</p>' +
+        '<p>可以先看录好的动画：<a href="index.html#gallery">八个分类</a>，' +
+        '或 <a href="javascript:location.reload()">重新加载本页</a>。</p>' +
+        (msg ? '<p class="nolab-msg">' + String(msg) + '</p>' : '') +
+        '</div>';
+      st.setAttribute('data-err', String(msg || 'unknown'));
     }
-  });
+    window.addEventListener('error', function (e) {
+      fallback((e && (e.message || (e.error && e.error.message))) || '');
+    });
+    // 看门狗：6 秒还没画出一帧，就当作失败
+    setTimeout(function () {
+      if (window.__lab_ok) { return; }
+      var c = document.getElementById('c3d');
+      var ok = false;
+      try {
+        ok = !!(c && c.width > 2 && c.height > 2);
+      } catch (err) { ok = false; }
+      if (!ok) { fallback('3D 初始化超时'); }
+    }, 6000);
+  })();
 </script>
 
 
