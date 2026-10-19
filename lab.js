@@ -403,7 +403,10 @@ function refreshReadout() {
   const b = betaOf(h, P.l);
   const [Tx, Ty] = periods(h, P.l);
   const crit = thetaCrit(h, P.d) / DEG;
-  // 准静态张力：T3 = m g cos(theta)。真实摆动还要加 l*theta_dot^2，会更大。
+  // 纯面内准静态张力：T3 = m g cos(theta)。
+// 注意：把 T3 换成含向心项的 m(g cosθ + lθ̇²) 只改变张力大小，
+// 不改变一侧上绳归零的临界角（|tanθ| = a/h）。
+// 且该式只适用于纯面内；二维耦合运动的张力需另行推导。
   const [T1, T2] = tensions(S.th, h, P.l, P.d);
   const [btxt, exact] = ratioText(b);
   const m = /^(\d+)\s*:\s*(\d+)$/.exec(btxt);
@@ -681,6 +684,20 @@ function loop(now) {
   if (!USE2D && S.running && frameCount % 2 === 0) pushTrail(curPose.B);
   if (frameCount % 6 === 0) refreshReadout();
   if (window.__projTick) window.__projTick();
+
+  // 一侧上绳松弛后，双绳张紧方程不再成立：就地暂停，不拿旧方程冒充真实过程
+  if (S.running) {
+    const hh = hOf(P.L, P.d), a = P.d / 2;
+    if (Math.abs(Math.tan(S.th)) >= a / hh - 1e-12) {
+      S.running = false;
+      document.getElementById('btn-pause').textContent = '已暂停';
+      const w = document.getElementById('warn');
+      if (w) {
+        w.className = 'lab-badge on';
+        w.textContent = '⚠ 一侧上绳开始松弛：当前双绳张紧模型不再适用，运动已暂停。';
+      }
+    }
+  }
   if (USE2D) { draw2d(); } else { renderer.render(scene, camera); }
 }
 requestAnimationFrame(loop);
