@@ -36,69 +36,140 @@ FULLSCREEN_ICON = (
 PAGE_JS = """<script>
 (function () {
   "use strict";
-  function markMissing(card) {
-    if (card) { card.classList.add("missing"); }
+  // 移动端一次只加载一段：WKWebView / X5 对并发视频有限制，
+  // 一次挂 4~5 个 src 会让后几个直接失败。
+  var wide = false;
+  try { wide = window.matchMedia("(min-width: 721px)").matches; } catch (e) {}
+
+  function attach(v) {
+    if (!v.getAttribute("src") && v.dataset.src) {
+      v.setAttribute("src", v.dataset.src);
+      v.load();
+    }
   }
+  function play(v) {
+    v.muted = true;
+    v.loop = true;
+    try {
+      var pr = v.play();
+      if (pr && typeof pr.catch === "function") { pr.catch(function () {}); }
+    } catch (e) {}
+  }
+  function pauseOthers(keep) {
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v !== keep) { try { v.pause(); } catch (e) {} }
+    });
+  }
+  function showOverlay(card, on) {
+    var b = card.querySelector(".playbtn");
+    if (b) { b.hidden = !on; }
+  }
+  function markBad(card, text) {
+    var lab = card.querySelector(".placeholder-label");
+    if (lab) { lab.textContent = text; }
+    card.classList.add("missing");
+  }
+
   var cards = document.querySelectorAll(".card");
-  cards.forEach(function (card) {
+  cards.forEach(function (card, idx) {
     var video = card.querySelector("video");
     if (!video) { return; }
-    video.addEventListener("error", function () { markMissing(card); });
-    var posterUrl = video.getAttribute("poster");
-    if (posterUrl) {
-      var probe = new Image();
-      probe.addEventListener("error", function () { markMissing(card); });
-      probe.src = posterUrl;
-    }
-    window.setTimeout(function () {
-      if (video.readyState === 0) { markMissing(card); }
-    }, 4000);
-  });
-  var buttons = document.querySelectorAll(".fs");
-  buttons.forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var card = btn.closest(".card");
-      var video = card ? card.querySelector("video") : null;
-      if (!video) { return; }
-      try {
-        if (typeof video.requestFullscreen === "function") {
-          var pending = video.requestFullscreen();
-          if (pending && typeof pending.catch === "function") {
-            pending.catch(function () { return; });
-          }
-        } else if (typeof video.webkitEnterFullscreen === "function") {
-          video.webkitEnterFullscreen();
-        }
-      } catch (err) {
+    var tries = 0;
+
+    function fail() {
+      // 先重试；两次都失败再判断到底是不是"文件不存在"
+      if (tries < 2) {
+        tries += 1;
+        window.setTimeout(function () {
+          video.removeAttribute("src");
+          attach(video);
+          play(video);
+        }, 700 * tries);
         return;
       }
+      var src = video.dataset.src || "";
+      if (!src) { markBad(card, "MEDIA NOT FOUND"); return; }
+      fetch(src, { method: "HEAD" }).then(function (r) {
+        markBad(card, r.ok ? "加载失败 · 点我看重试" : "MEDIA NOT FOUND");
+      }).catch(function () {
+        markBad(card, "加载失败 · 点我看重试");
+      });
+    }
+
+    video.addEventListener("error", fail);
+    // 点占位块 = 重试
+    var ph = card.querySelector(".placeholder");
+    if (ph) {
+      ph.addEventListener("click", function () {
+        card.classList.remove("missing");
+        tries = 0;
+        video.removeAttribute("src");
+        attach(video);
+        play(video);
+      });
+    }
+    // 点播放按钮 = 播这一段，其余暂停
+    var btn = card.querySelector(".playbtn");
+    if (btn) {
+      btn.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        pauseOthers(video);
+        attach(video);
+        play(video);
+        showOverlay(card, false);
+      });
+    }
+    video.addEventListener("playing", function () { showOverlay(card, false); });
+    // 还没挂 src 时原生控件是死的，整块画面点一下就该开始播
+    video.addEventListener("click", function (ev) {
+      if (video.getAttribute("src")) { return; }
+      ev.preventDefault();
+      pauseOthers(video);
+      attach(video);
+      play(video);
+      showOverlay(card, false);
     });
+
+    if (wide || idx === 0) {
+      video.autoplay = true;      // 宽屏走原生自动播放，比脚本 play() 稳
+      attach(video);
+      play(video);
+    } else {
+      showOverlay(card, true);
+    }
   });
-  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+
+  // 兜底：微信/X5 拦自动播放时，一次点击把能播的都开起来
   function playAll() {
-    document.querySelectorAll("video").forEach(function (v) {
-      v.muted = true;
-      v.loop = true;
-      try {
-        var p = v.play();
-        if (p && typeof p.catch === "function") { p.catch(function () {}); }
-      } catch (err) { /* ignore */ }
+    document.querySelectorAll(".card").forEach(function (card, idx) {
+      var v = card.querySelector("video");
+      if (!v) { return; }
+      if (!wide && idx > 0) { pauseOthers(v); }
+      v.autoplay = true;
+      attach(v);
+      play(v);
+      showOverlay(card, false);
     });
   }
   var allBtn = document.getElementById("playall");
   if (allBtn) {
+    if (!wide) { allBtn.hidden = false; }
     allBtn.addEventListener("click", function () {
       playAll();
       allBtn.classList.add("done");
     });
   }
+
+  // 只检查"一个都没播起来"，不再用 readyState 判缺失
   window.setTimeout(function () {
-    var paused = 0;
+    var paused = 0, total = 0;
     document.querySelectorAll("video").forEach(function (v) {
+      total += 1;
       if (v.paused) { paused += 1; }
     });
-    if (paused > 0 && allBtn) { allBtn.hidden = false; }
-  }, 2500);
+    if (allBtn && total > 0 && paused === total) { allBtn.hidden = false; }
+  }, 3000);
 })();
 </script>"""
 
@@ -281,6 +352,18 @@ a:focus-visible, button:focus-visible {
   letter-spacing: 2px;
 }
 .placeholder-note { margin: 0; font-size: 14px; }
+.card.missing .placeholder { cursor: pointer; }
+.playbtn {
+  position: absolute; inset: 0; margin: auto;
+  width: 74px; height: 74px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.34);
+  background: rgba(0,0,0,0.46);
+  color: #fff; font-size: 26px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 3;
+}
+.playbtn[hidden] { display: none; }
+.playbtn span { transform: translateX(3px); }
 .clip-text { padding: 12px 14px 16px; overflow-wrap: anywhere; }
 .clip-text h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.4; }
 .clip-text p { margin: 0; color: var(--muted); font-size: 14px; }
@@ -419,7 +502,8 @@ def clip_card_html(clip: dict) -> str:
     note = esc(clip.get("note", ""))
     return f'''<article class="card clip-card">
   <div class="player">
-    <video src="{src}" poster="{poster}" autoplay muted loop controls playsinline webkit-playsinline x5-playsinline preload="metadata" aria-label="{title}"></video>
+    <video poster="{poster}" muted loop controls playsinline webkit-playsinline x5-playsinline preload="none" data-src="{src}" aria-label="{title}"></video>
+    <button class="playbtn" type="button" aria-label="Play" hidden><span aria-hidden="true">▶</span></button>
     <div class="placeholder">
       <p class="placeholder-label">MEDIA NOT FOUND</p>
       <p class="placeholder-note">{note}</p>
