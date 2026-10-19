@@ -375,7 +375,7 @@ def build_index(catalog: dict) -> str:
         '<span class="badge" aria-hidden="true">&#9881;</span>'
         '<span class="group-info">'
         '<span class="group-title">交互实验台（可拖动旋转）</span>'
-        '<span class="group-sub">拉滑块改 d、L、l 与初角，实时看频率比和轨迹</span>'
+        '<span class="group-sub">拉滑块改 d、L、l 和初角，频率比与轨迹同步变</span>'
         '</span>'
         '<span class="count">&rarr;</span>'
         '</a>'
