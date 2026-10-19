@@ -12,6 +12,7 @@ it twice produces identical files.
 """
 
 import html
+import io
 import json
 import pathlib
 import sys
@@ -219,7 +220,9 @@ a:focus-visible, button:focus-visible {
 .back, .fs, .group-card { touch-action: manipulation; }
 
 /* home masthead */
-.masthead { margin: 6px 0 18px; }
+.masthead { margin: 4px 0 14px; }
+.masthead.compact h1 { font-size: 22px; }
+.masthead.compact .sub { font-size: 13px; }
 .masthead h1 {
   margin: 0 0 6px;
   font-size: 30px;
@@ -471,20 +474,29 @@ def footer_html(project) -> str:
     )
 
 
+
+def _lab_inline():
+    """把 lab.html 的舞台内联进主页，做到扫码进去第一屏就是交互台。"""
+    import re as _re
+    s = io.open(SCRIPT_DIR / "lab.html", encoding="utf-8").read()
+    styles = "\n".join(_re.findall(r"<style[^>]*>.*?</style>", s, _re.S))
+    i = s.index('<main class="wrap lab-wrap">')
+    j = s.rindex("</main>")
+    inner = s[i + len('<main class="wrap lab-wrap">'):j]
+    inner = _re.sub(r'<nav class="topnav">.*?</nav>', "", inner, flags=_re.S)
+    # 主页已经有 masthead，去掉实验台自带的标题避免重复
+    inner = _re.sub(r'<header class="lab-head">.*?</header>', "", inner,
+                    flags=_re.S)
+    tail = s[j:]
+    scripts = "\n".join(_re.findall(
+        r"<script(?![^>]*src=)[^>]*>.*?</script>", tail, _re.S))
+    return styles, inner, ('<script type="module" src="lab.js"></script>\n'
+                           + scripts)
+
+
 def build_index(catalog: dict) -> str:
     project = str(catalog.get("project", ""))
     cards = []
-    # 交互实验台放在最前面
-    cards.append(
-        '<a class="card group-card labcard" href="lab.html">'
-        '<span class="badge" aria-hidden="true">&#9881;</span>'
-        '<span class="group-info">'
-        '<span class="group-title">交互实验台（可拖动旋转）</span>'
-        '<span class="group-sub">拉滑块改 d、L、l 和初角，频率比与轨迹同步变</span>'
-        '</span>'
-        '<span class="count">&rarr;</span>'
-        '</a>'
-    )
     for group in catalog.get("groups", []):
         code = str(group.get("code", ""))
         code_file = safe_code(code)
@@ -499,27 +511,23 @@ def build_index(catalog: dict) -> str:
             f'<span class="count">{n_clips}</span>'
             f'</a>'
         )
+    styles, lab_body, lab_scripts = _lab_inline()
     parts = [
+        styles,
         '<main class="wrap">',
-        '<header class="masthead">',
+        '<header class="masthead compact">',
         f'<h1>{esc(project)}</h1>',
         f'<p class="sub">{esc(catalog.get("subtitle", ""))}</p>',
-        '<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，'
-        '不是实测结果；实测数据待补。</p>',
         '</header>',
-        '<a class="hero" href="lab.html">',
-        '<span class="hero-kicker">先玩这个</span>',
-        '<span class="hero-title">交互实验台</span>',
-        '<span class="hero-sub">拖动旋转三维装置，拉滑块改 d、L、l、'
-        '初角和阻尼；频率比、两个周期、公共周期、两条上绳张力实时跟着变，'
-        '球心轨迹当场画出来。</span>',
-        '<span class="hero-cta">开始操作 →</span>',
-        '</a>',
+        lab_body,
         '<nav class="grid groups">',
         "\n".join(cards),
         '</nav>',
+        '<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，'
+        '不是实测结果；实测数据待补。</p>',
         footer_html(project),
         '</main>',
+        lab_scripts,
     ]
     return page(project, "\n".join(parts) + "\n")
 

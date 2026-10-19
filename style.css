@@ -44,7 +44,9 @@ a:focus-visible, button:focus-visible {
 .back, .fs, .group-card { touch-action: manipulation; }
 
 /* home masthead */
-.masthead { margin: 6px 0 18px; }
+.masthead { margin: 4px 0 14px; }
+.masthead.compact h1 { font-size: 22px; }
+.masthead.compact .sub { font-size: 13px; }
 .masthead h1 {
   margin: 0 0 6px;
   font-size: 30px;

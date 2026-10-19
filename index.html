@@ -11,20 +11,163 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<style>
+  .lab-wrap { padding-bottom: 8px; }
+  .lab-head h1 { margin: 8px 0 4px; font-size: 26px; line-height: 1.25; }
+  .lab-head p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 56vh;
+    min-height: 300px;
+    max-height: 520px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    touch-action: none;
+  }
+  #c3d { display: block; width: 100%; height: 100%; }
+  .hint {
+    position: absolute; left: 10px; bottom: 8px;
+    font-size: 12px; color: #8fa0b4; background: rgba(0,0,0,.45);
+    padding: 3px 8px; border-radius: 8px; pointer-events: none;
+  }
+  .badge {
+    position: absolute; left: 10px; top: 10px; right: 10px;
+    font-size: 13px; line-height: 1.4; color: #ff8a8a;
+    background: rgba(60,0,0,.55); border: 1px solid #7a2b2b;
+    padding: 7px 10px; border-radius: 10px; display: none;
+  }
+  .badge.on { display: block; }
+  .viewbtns {
+    position: absolute; right: 8px; top: 8px; display: flex; gap: 6px;
+  }
+  .viewbtns button {
+    min-height: 34px; padding: 0 10px; font-size: 13px;
+    color: var(--text); background: rgba(20,26,34,.8);
+    border: 1px solid var(--line); border-radius: 9px;
+  }
+  .readout {
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 6px 10px; margin: 12px 0 4px; font-size: 14px;
+  }
+  .readout div { display: flex; justify-content: space-between; gap: 8px;
+    border-bottom: 1px solid #1a212b; padding: 5px 0; }
+  .readout b { font-weight: 600; color: var(--accent-a); font-variant-numeric: tabular-nums; }
+  .readout .warnv { color: #ff6b6b; }
+  .ctrls { margin: 10px 0 4px; }
+  .ctrl { margin: 9px 0; }
+  .ctrl label { display: flex; justify-content: space-between; font-size: 14px;
+    color: var(--muted); margin-bottom: 2px; }
+  .ctrl label span { color: var(--text); font-variant-numeric: tabular-nums; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 30px;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; background: #263140; border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px;
+    border-radius: 50%; background: var(--accent-a); border: 0;
+  }
+  input[type=range]::-moz-range-track { height: 4px; background: #263140; border-radius: 2px; }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0;
+    border-radius: 50%; background: var(--accent-a); }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .btnrow button {
+    min-height: 44px; padding: 0 14px; font-size: 14px; font-family: inherit;
+    color: var(--text); background: #131a23; border: 1px solid var(--line);
+    border-radius: 11px;
+  }
+  .btnrow button.primary { background: var(--accent-a); color: #08111a; border-color: transparent; font-weight: 600; }
+  .btnrow button:active { transform: scale(.98); }
+  .tip { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 10px 0 0; }
+  .nolab { padding: 18px; color: #ff8a8a; }
+</style>
 <main class="wrap">
-<header class="masthead">
+<header class="masthead compact">
 <h1>Y形摆 · 鲍迪奇摆 · 三维仿真动画</h1>
 <p class="sub">CUPT 2027 Problem 5 · Y-shaped Pendulum</p>
-<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，不是实测结果；实测数据待补。</p>
 </header>
-<a class="hero" href="lab.html">
-<span class="hero-kicker">先玩这个</span>
-<span class="hero-title">交互实验台</span>
-<span class="hero-sub">拖动旋转三维装置，拉滑块改 d、L、l、初角和阻尼；频率比、两个周期、公共周期、两条上绳张力实时跟着变，球心轨迹当场画出来。</span>
-<span class="hero-cta">开始操作 →</span>
-</a>
+
+
+
+
+
+<div class="stage" id="stage">
+  <canvas id="c3d"></canvas>
+  <div class="badge" id="warn">⚠ 摆角已超过 23.2°：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
+  <div class="viewbtns">
+    <button type="button" data-view="iso">斜视</button>
+    <button type="button" data-view="front">正视</button>
+    <button type="button" data-view="top">俯视</button>
+  </div>
+  <div class="hint">拖动旋转 · 滚轮/双指缩放</div>
+</div>
+
+<div class="readout" id="readout">
+  <div><span>结点落差 h</span><b id="o-h">—</b></div>
+  <div><span>频率比 β</span><b id="o-b">—</b></div>
+  <div><span>T 面内</span><b id="o-tx">—</b></div>
+  <div><span>T 面外</span><b id="o-ty">—</b></div>
+  <div><span>公共周期</span><b id="o-tc">—</b></div>
+  <div><span>松绳临界</span><b id="o-crit">—</b></div>
+  <div><span>上绳 T1（准静态）</span><b id="o-t1">—</b></div>
+  <div><span>上绳 T2（准静态）</span><b id="o-t2">—</b></div>
+</div>
+
+<div class="btnrow">
+  <button type="button" class="primary" id="btn-go">释放 / 重来</button>
+  <button type="button" id="btn-pause">暂停</button>
+  <button type="button" id="btn-clear">清轨迹</button>
+</div>
+<div class="btnrow">
+  <button type="button" data-preset="32">3 : 2 标准</button>
+  <button type="button" data-preset="21">2 : 1</button>
+  <button type="button" data-preset="54">5 : 4</button>
+  <button type="button" data-preset="crit">松绳临界</button>
+  <button type="button" data-preset="irr">无理比 √2</button>
+</div>
+
+<div class="ctrls">
+  <div class="ctrl">
+    <label>悬点间距 d <span id="v-d">30.00 cm</span></label>
+    <input type="range" id="s-d" min="10" max="60" step="0.01" value="39.95">
+  </div>
+  <div class="ctrl">
+    <label>上绳 L <span id="v-L">38.08 cm</span></label>
+    <input type="range" id="s-L" min="22" max="45" step="0.01" value="32">
+  </div>
+  <div class="ctrl">
+    <label>下绳 l <span id="v-l">45.00 cm</span></label>
+    <input type="range" id="s-l" min="6" max="40" step="0.01" value="20">
+  </div>
+  <div class="ctrl">
+    <label>面内初角 θ₀ <span id="v-th0">9.0°</span></label>
+    <input type="range" id="s-th" min="0.5" max="50" step="0.1" value="9">
+  </div>
+  <div class="ctrl">
+    <label>面外初角 φ₀ <span id="v-ph0">9.0°</span></label>
+    <input type="range" id="s-ph" min="0.5" max="50" step="0.1" value="9">
+  </div>
+  <div class="ctrl">
+    <label>阻尼 γ <span id="v-gam">0.03 s⁻¹</span></label>
+    <input type="range" id="s-g" min="0" max="0.4" step="0.01" value="0.03">
+  </div>
+</div>
+
+<p class="tip">
+  默认是 3:2 设计点：d = 39.95 cm、L = 32.00 cm、l = 20.00 cm，得 h = 25.00 cm、β = 1.5。
+  把 θ₀ 拉到 38.6° 以上，一侧上绳张力归零，即报告 3.5 节的松绳判据。
+  张力读数按准静态算（T3 = mg cosθ）；实际摆动中 T3 = m(g cosθ + lθ̇²) 更大，松绳会更晚。
+  完整对比动画在 <a href="index.html">总目录</a>。
+</p>
+
+<footer class="site-footer"><p>Y 形摆 · 鲍迪奇摆 · 交互实验台 · CUPT 2027 Problem 5</p></footer>
+
 <nav class="grid groups">
-<a class="card group-card labcard" href="lab.html"><span class="badge" aria-hidden="true">&#9881;</span><span class="group-info"><span class="group-title">交互实验台（可拖动旋转）</span><span class="group-sub">拉滑块改 d、L、l 和初角，频率比与轨迹同步变</span></span><span class="count">&rarr;</span></a>
 <a class="card group-card" href="g-A.html"><span class="badge" aria-hidden="true">A</span><span class="group-info"><span class="group-title">装置与几何约束</span><span class="group-sub">两条等长上绳，把结点限制在一段圆弧上</span></span><span class="count">4</span></a>
 <a class="card group-card" href="g-B.html"><span class="badge" aria-hidden="true">B</span><span class="group-info"><span class="group-title">李萨如图形</span><span class="group-sub">频率比决定闭合，初相位决定形态（理想数学示例）</span></span><span class="count">5</span></a>
 <a class="card group-card" href="g-C.html"><span class="badge" aria-hidden="true">C</span><span class="group-info"><span class="group-title">大摆角与松绳</span><span class="group-sub">38.6°：单侧上绳松弛，约束失效</span></span><span class="count">3</span></a>
@@ -34,8 +177,22 @@
 <a class="card group-card" href="g-G.html"><span class="badge" aria-hidden="true">G</span><span class="group-info"><span class="group-title">调距机构</span><span class="group-sub">丝杆原地转、螺母只平移，中点不动</span></span><span class="count">1</span></a>
 <a class="card group-card" href="g-H.html"><span class="badge" aria-hidden="true">H</span><span class="group-info"><span class="group-title">误差与镜头畸变</span><span class="group-sub">哪些是摆的物理，哪些只是相机的错</span></span><span class="count">2</span></a>
 </nav>
+<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，不是实测结果；实测数据待补。</p>
 <footer class="site-footer"><p>Y形摆 · 鲍迪奇摆 · 三维仿真动画 &middot; CUPT 2027 Problem 5</p></footer>
 </main>
+<script type="module" src="lab.js"></script>
+<script>
+  // 若模块/WebGL 起不来，给一块可读的退路
+  window.addEventListener('error', function (e) {
+    var s = document.getElementById('stage');
+    if (s && !window.__lab_ok) {
+      var msg = (e && (e.message || (e.error && e.error.message))) || 'unknown';
+      s.innerHTML = '<div class="nolab">3D 没能启动：<br>' +
+        String(msg) + '<br><br>可以先回 <a href="index.html">总目录</a> 看录好的动画。</div>';
+      s.setAttribute('data-err', String(msg));
+    }
+  });
+</script>
 
 
 </body>
