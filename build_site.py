@@ -723,10 +723,10 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.28; }
 .wm-layer {
   position: fixed; inset: 0; z-index: 9998;
   pointer-events: none; user-select: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27190%27%20height%3D%27120%27%3E%3Ctext%20x%3D%274%27%20y%3D%2772%27%20font-size%3D%2715%27%20font-weight%3D%27600%27%20font-family%3D%27sans-serif%27%20fill%3D%27%23ffffff%27%20transform%3D%27rotate%28-26%204%2072%29%27%3E25%E7%BB%84%20%C2%B7%20%E7%AC%AC5%E9%A2%98%3C%2Ftext%3E%3C%2Fsvg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27168%27%20height%3D%27104%27%3E%3Ctext%20x%3D%274%27%20y%3D%2764%27%20font-size%3D%2715%27%20font-weight%3D%27600%27%20font-family%3D%27sans-serif%27%20fill%3D%27%23ffffff%27%20transform%3D%27rotate%28-26%204%2064%29%27%3E25%E7%BB%84%20%C2%B7%20%E7%AC%AC5%E9%A2%98%3C%2Ftext%3E%3C%2Fsvg%3E");
   background-repeat: repeat;
-  background-size: 190px 120px;
-  opacity: .10;
+  background-size: 168px 104px;
+  opacity: .13;
 }
 .wm-tag {
   position: fixed; right: 10px; bottom: 10px; z-index: 9999;
