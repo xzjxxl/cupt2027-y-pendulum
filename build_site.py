@@ -309,6 +309,11 @@ a:focus-visible, button:focus-visible {
   cursor: pointer;
 }
 .playall[hidden] { display: none; }
+
+/* 交互实验台入口卡片 */
+.labcard { border-color: var(--accent-a); }
+.labcard .badge { background: var(--accent-a); color: #08111a; }
+.labcard .count { color: var(--accent-a); font-size: 20px; }
 .playall.done { background: #2a323d; color: var(--text); }
 """
 
@@ -358,6 +363,17 @@ def footer_html(project) -> str:
 def build_index(catalog: dict) -> str:
     project = str(catalog.get("project", ""))
     cards = []
+    # 交互实验台放在最前面
+    cards.append(
+        '<a class="card group-card labcard" href="lab.html">'
+        '<span class="badge" aria-hidden="true">&#9881;</span>'
+        '<span class="group-info">'
+        '<span class="group-title">交互实验台（可拖动旋转）</span>'
+        '<span class="group-sub">拉滑块改 d、L、l 与初角，实时看频率比和轨迹</span>'
+        '</span>'
+        '<span class="count">&rarr;</span>'
+        '</a>'
+    )
     for group in catalog.get("groups", []):
         code = str(group.get("code", ""))
         code_file = safe_code(code)

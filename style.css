@@ -205,4 +205,9 @@ a:focus-visible, button:focus-visible {
   cursor: pointer;
 }
 .playall[hidden] { display: none; }
+
+/* 交互实验台入口卡片 */
+.labcard { border-color: var(--accent-a); }
+.labcard .badge { background: var(--accent-a); color: #08111a; }
+.labcard .count { color: var(--accent-a); font-size: 20px; }
 .playall.done { background: #2a323d; color: var(--text); }

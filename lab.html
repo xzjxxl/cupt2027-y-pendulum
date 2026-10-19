@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Y 形摆交互实验台 · CUPT 2027 Problem 5</title>
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="stylesheet" href="style.css">
+<style>
+  .lab-wrap { padding-bottom: 8px; }
+  .lab-head h1 { margin: 8px 0 4px; font-size: 26px; line-height: 1.25; }
+  .lab-head p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 56vh;
+    min-height: 300px;
+    max-height: 520px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    touch-action: none;
+  }
+  #c3d { display: block; width: 100%; height: 100%; }
+  .hint {
+    position: absolute; left: 10px; bottom: 8px;
+    font-size: 12px; color: #8fa0b4; background: rgba(0,0,0,.45);
+    padding: 3px 8px; border-radius: 8px; pointer-events: none;
+  }
+  .badge {
+    position: absolute; left: 10px; top: 10px; right: 10px;
+    font-size: 13px; line-height: 1.4; color: #ff8a8a;
+    background: rgba(60,0,0,.55); border: 1px solid #7a2b2b;
+    padding: 7px 10px; border-radius: 10px; display: none;
+  }
+  .badge.on { display: block; }
+  .viewbtns {
+    position: absolute; right: 8px; top: 8px; display: flex; gap: 6px;
+  }
+  .viewbtns button {
+    min-height: 34px; padding: 0 10px; font-size: 13px;
+    color: var(--text); background: rgba(20,26,34,.8);
+    border: 1px solid var(--line); border-radius: 9px;
+  }
+  .readout {
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 6px 10px; margin: 12px 0 4px; font-size: 14px;
+  }
+  .readout div { display: flex; justify-content: space-between; gap: 8px;
+    border-bottom: 1px solid #1a212b; padding: 5px 0; }
+  .readout b { font-weight: 600; color: var(--accent-a); font-variant-numeric: tabular-nums; }
+  .readout .warnv { color: #ff6b6b; }
+  .ctrls { margin: 10px 0 4px; }
+  .ctrl { margin: 9px 0; }
+  .ctrl label { display: flex; justify-content: space-between; font-size: 14px;
+    color: var(--muted); margin-bottom: 2px; }
+  .ctrl label span { color: var(--text); font-variant-numeric: tabular-nums; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 30px;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; background: #263140; border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px;
+    border-radius: 50%; background: var(--accent-a); border: 0;
+  }
+  input[type=range]::-moz-range-track { height: 4px; background: #263140; border-radius: 2px; }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0;
+    border-radius: 50%; background: var(--accent-a); }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .btnrow button {
+    min-height: 44px; padding: 0 14px; font-size: 14px; font-family: inherit;
+    color: var(--text); background: #131a23; border: 1px solid var(--line);
+    border-radius: 11px;
+  }
+  .btnrow button.primary { background: var(--accent-a); color: #08111a; border-color: transparent; font-weight: 600; }
+  .btnrow button:active { transform: scale(.98); }
+  .tip { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 10px 0 0; }
+  .nolab { padding: 18px; color: #ff8a8a; }
+</style>
+</head>
+<body>
+<main class="wrap lab-wrap">
+<nav class="topnav"><a class="back" href="index.html">&#8592; HOME</a></nav>
+
+<header class="lab-head">
+  <h1>Y 形摆 · 交互实验台</h1>
+  <p>拖动旋转 · 双指缩放 · 拉滑块改参数，实时看频率比与轨迹怎么变</p>
+</header>
+
+<div class="stage" id="stage">
+  <canvas id="c3d"></canvas>
+  <div class="badge" id="warn">⚠ 摆角已超过 23.2°：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
+  <div class="viewbtns">
+    <button type="button" data-view="iso">斜视</button>
+    <button type="button" data-view="front">正视</button>
+    <button type="button" data-view="top">俯视</button>
+  </div>
+  <div class="hint">拖动旋转 · 滚轮/双指缩放</div>
+</div>
+
+<div class="readout" id="readout">
+  <div><span>结点落差 h</span><b id="o-h">—</b></div>
+  <div><span>频率比 β</span><b id="o-b">—</b></div>
+  <div><span>T 面内</span><b id="o-tx">—</b></div>
+  <div><span>T 面外</span><b id="o-ty">—</b></div>
+  <div><span>公共周期</span><b id="o-tc">—</b></div>
+  <div><span>松绳临界</span><b id="o-crit">—</b></div>
+  <div><span>上绳 T1</span><b id="o-t1">—</b></div>
+  <div><span>上绳 T2</span><b id="o-t2">—</b></div>
+</div>
+
+<div class="btnrow">
+  <button type="button" class="primary" id="btn-go">释放 / 重来</button>
+  <button type="button" id="btn-pause">暂停</button>
+  <button type="button" id="btn-clear">清轨迹</button>
+</div>
+<div class="btnrow">
+  <button type="button" data-preset="43">4 : 3 标准</button>
+  <button type="button" data-preset="21">2 : 1</button>
+  <button type="button" data-preset="54">5 : 4</button>
+  <button type="button" data-preset="crit">松绳临界</button>
+  <button type="button" data-preset="irr">无理比 √2</button>
+</div>
+
+<div class="ctrls">
+  <div class="ctrl">
+    <label>悬点间距 d <span id="v-d">30.00 cm</span></label>
+    <input type="range" id="s-d" min="10" max="40" step="0.01" value="30">
+  </div>
+  <div class="ctrl">
+    <label>上绳 L <span id="v-L">38.08 cm</span></label>
+    <input type="range" id="s-L" min="26" max="46" step="0.01" value="38.08">
+  </div>
+  <div class="ctrl">
+    <label>下绳 l <span id="v-l">45.00 cm</span></label>
+    <input type="range" id="s-l" min="6" max="50" step="0.01" value="45">
+  </div>
+  <div class="ctrl">
+    <label>面内初角 θ₀ <span id="v-th0">9.0°</span></label>
+    <input type="range" id="s-th" min="0.5" max="26" step="0.1" value="9">
+  </div>
+  <div class="ctrl">
+    <label>面外初角 φ₀ <span id="v-ph0">9.0°</span></label>
+    <input type="range" id="s-ph" min="0.5" max="26" step="0.1" value="9">
+  </div>
+  <div class="ctrl">
+    <label>阻尼 γ <span id="v-gam">0.03 s⁻¹</span></label>
+    <input type="range" id="s-g" min="0" max="0.4" step="0.01" value="0.03">
+  </div>
+</div>
+
+<p class="tip">
+  默认几何就是报告里的 4:3 工况（d = 30 cm、L = 38.08 cm、h = 35 cm、l = 45 cm）。
+  把 l 拉到 11.7 cm 会变成 2:1；把 θ₀ 拉到 23.2° 以上，一侧上绳张力会归零——这就是报告 3.5 节的松绳判据。
+  想看完整的对比动画，回 <a href="index.html">总目录</a>。
+</p>
+
+<footer class="site-footer"><p>Y 形摆 · 鲍迪奇摆 · 交互实验台 · CUPT 2027 Problem 5</p></footer>
+</main>
+
+<script type="module" src="lab.js"></script>
+<script>
+  // 若模块/WebGL 起不来，给一块可读的退路
+  window.addEventListener('error', function (e) {
+    var s = document.getElementById('stage');
+    if (s && !window.__lab_ok) {
+      var msg = (e && (e.message || (e.error && e.error.message))) || 'unknown';
+      s.innerHTML = '<div class="nolab">3D 没能启动：<br>' +
+        String(msg) + '<br><br>可以先回 <a href="index.html">总目录</a> 看录好的动画。</div>';
+      s.setAttribute('data-err', String(msg));
+    }
+  });
+</script>
+</body>
+</html>
