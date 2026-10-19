@@ -395,6 +395,28 @@ a:focus-visible, button:focus-visible {
 }
 .playall[hidden] { display: none; }
 
+/* 首页 hero：交互实验台 */
+.hero {
+  display: block;
+  margin: 0 0 22px;
+  padding: 26px 24px 22px;
+  border: 1px solid var(--accent-a);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(53,199,216,0.10), rgba(53,199,216,0.02));
+  text-decoration: none;
+  color: var(--text);
+}
+.hero-kicker {
+  display: inline-block; margin-bottom: 8px; padding: 2px 9px;
+  border-radius: 999px; background: var(--accent-a); color: #08111a;
+  font-size: 12.5px; font-weight: 700; letter-spacing: .04em;
+}
+.hero-title { display: block; font-size: 27px; font-weight: 800; }
+.hero-sub { display: block; margin-top: 8px; color: var(--muted);
+  font-size: 14.5px; line-height: 1.6; }
+.hero-cta { display: inline-block; margin-top: 16px; color: var(--accent-a);
+  font-size: 16px; font-weight: 700; }
+
 /* 交互实验台入口卡片 */
 .labcard { border-color: var(--accent-a); }
 .labcard .badge { background: var(--accent-a); color: #08111a; }
@@ -485,6 +507,14 @@ def build_index(catalog: dict) -> str:
         '<p class="note">画面与曲线都是报告 4.1 节给定输入下的条件设计值，'
         '不是实测结果；实测数据待补。</p>',
         '</header>',
+        '<a class="hero" href="lab.html">',
+        '<span class="hero-kicker">先玩这个</span>',
+        '<span class="hero-title">交互实验台</span>',
+        '<span class="hero-sub">拖动旋转三维装置，拉滑块改 d、L、l、'
+        '初角和阻尼；频率比、两个周期、公共周期、两条上绳张力实时跟着变，'
+        '球心轨迹当场画出来。</span>',
+        '<span class="hero-cta">开始操作 →</span>',
+        '</a>',
         '<nav class="grid groups">',
         "\n".join(cards),
         '</nav>',
