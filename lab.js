@@ -18,12 +18,22 @@ const periods = (h, l) => [2 * Math.PI * Math.sqrt(l / G),
                            2 * Math.PI * Math.sqrt((h + l) / G)];
 const thetaCrit = (h, d) => Math.atan((d / 2) / h);
 
-function tensions(th, h, l, d) {
+// 三绳张紧模型（结点无质量、支点固定、绳不可伸长）下的张力：
+//   θ 下绳相对「中点→结点」径向的偏角（不是相对竖直的夹角）
+//   φ 上方 Y 形平面绕横梁的转角
+//   R = h + l cosθ
+//   T3 = m[ g cosθ cosφ + l θ̇² + R cosθ φ̇² ]
+//   T(A,B) = (L T3 / 2)( cosθ/h ± sinθ/a ),  a = d/2
+// 纯面内（φ=φ̇=0）时退化为 T3 = mg cosθ + m l θ̇²。
+function tensions(th, ph, thd, phd, h, l, d) {
   const a = d / 2, L = Math.hypot(a, h);
-  const T3 = BOB_M * G * Math.cos(th);
+  const R = h + l * Math.cos(th);
+  const T3 = BOB_M * (G * Math.cos(th) * Math.cos(ph)
+                      + l * thd * thd
+                      + R * Math.cos(th) * phd * phd);
   const Sm = T3 * Math.cos(th) * L / h;
   const Dv = -T3 * Math.sin(th) * L / a;
-  return [(Sm + Dv) / 2, (Sm - Dv) / 2];
+  return { T1: (Sm + Dv) / 2, T2: (Sm - Dv) / 2, T3, a, L };
 }
 
 function rhs(th, ph, thd, phd, h, l, gam) {
@@ -368,7 +378,8 @@ function updateRig() {
                                        dir.clone().normalize());
     mesh.material.color.setHex(color);
   }
-  const [T1, T2] = tensions(S.th, hOf(P.L, P.d), P.l, P.d);
+  const _t = tensions(S.th, S.ph, S.thd, S.phd, hOf(P.L, P.d), P.l, P.d);
+    const T1 = _t.T1, T2 = _t.T2;
   placeString(sL, A1, K, T1 > 0 ? C.str : C.slack);
   placeString(sR, A2, K, T2 > 0 ? C.str : C.slack);
   placeString(sB, K, B, C.str);
@@ -407,7 +418,8 @@ function refreshReadout() {
 // 注意：把 T3 换成含向心项的 m(g cosθ + lθ̇²) 只改变张力大小，
 // 不改变一侧上绳归零的临界角（|tanθ| = a/h）。
 // 且该式只适用于纯面内；二维耦合运动的张力需另行推导。
-  const [T1, T2] = tensions(S.th, h, P.l, P.d);
+  const ten = tensions(S.th, S.ph, S.thd, S.phd, h, P.l, P.d);
+  const T1 = ten.T1, T2 = ten.T2, T3 = ten.T3;
   const [btxt, exact] = ratioText(b);
   const m = /^(\d+)\s*:\s*(\d+)$/.exec(btxt);
   const tc = m ? Number(m[1]) * Tx : null;   // 3:2 -> 3*T_x
@@ -424,8 +436,15 @@ function refreshReadout() {
   el('o-t1').className = T1 > 0 ? '' : 'warnv';
   el('o-t2').className = T2 > 0 ? '' : 'warnv';
 
-  const over = Math.abs(S.th) / DEG > crit || Math.abs(S.ph) / DEG > crit;
-  document.getElementById('warn').className = over ? 'lab-badge on' : 'lab-badge';
+  // 三根绳都要查：任一归零，张紧模型即失效
+  const bad = T3 <= 0 ? '下绳' : (T1 <= 0 ? '一侧上绳' : (T2 <= 0 ? '另一侧上绳' : ''));
+  const wn = document.getElementById('warn');
+  if (bad) {
+    wn.className = 'lab-badge on';
+    wn.textContent = '⚠ ' + bad + '张力已归零：三绳张紧模型不再适用，运动已暂停。';
+  } else {
+    wn.className = 'lab-badge';
+  }
   return { b, h, Tx, Ty };
 }
 
