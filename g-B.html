@@ -16,6 +16,7 @@
 <h1>李萨如图形</h1>
 <p class="sub">频率比决定闭合，初相位决定形态</p>
 <p class="intro">同一台摆，换频率比得到不同骨架；同一个频率比，换相位得到不同姿态。</p>
+<button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
@@ -134,6 +135,31 @@
       }
     });
   });
+  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+  function playAll() {
+    document.querySelectorAll("video").forEach(function (v) {
+      v.muted = true;
+      v.loop = true;
+      try {
+        var p = v.play();
+        if (p && typeof p.catch === "function") { p.catch(function () {}); }
+      } catch (err) { /* ignore */ }
+    });
+  }
+  var allBtn = document.getElementById("playall");
+  if (allBtn) {
+    allBtn.addEventListener("click", function () {
+      playAll();
+      allBtn.classList.add("done");
+    });
+  }
+  window.setTimeout(function () {
+    var paused = 0;
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v.paused) { paused += 1; }
+    });
+    if (paused > 0 && allBtn) { allBtn.hidden = false; }
+  }, 2500);
 })();
 </script>
 </body>

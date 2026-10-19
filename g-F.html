@@ -16,6 +16,7 @@
 <h1>自转与装配扰动</h1>
 <p class="sub">球会转、结点会滑、门架会晃</p>
 <p class="intro">摆球自转是慢得多的扭摆模态；装配不对称让平衡点偏移；顶梁晃动是受迫振动。</p>
+<button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
@@ -106,6 +107,31 @@
       }
     });
   });
+  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+  function playAll() {
+    document.querySelectorAll("video").forEach(function (v) {
+      v.muted = true;
+      v.loop = true;
+      try {
+        var p = v.play();
+        if (p && typeof p.catch === "function") { p.catch(function () {}); }
+      } catch (err) { /* ignore */ }
+    });
+  }
+  var allBtn = document.getElementById("playall");
+  if (allBtn) {
+    allBtn.addEventListener("click", function () {
+      playAll();
+      allBtn.classList.add("done");
+    });
+  }
+  window.setTimeout(function () {
+    var paused = 0;
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v.paused) { paused += 1; }
+    });
+    if (paused > 0 && allBtn) { allBtn.hidden = false; }
+  }, 2500);
 })();
 </script>
 </body>

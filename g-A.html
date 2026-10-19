@@ -16,6 +16,7 @@
 <h1>装置与几何约束</h1>
 <p class="sub">Y 形支架、两条等长上绳，与结点被迫走的那段圆弧</p>
 <p class="intro">两段等长上绳把结点钉在半径 h 的圆弧上；这就是两个方向周期不同的全部原因。</p>
+<button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
@@ -120,6 +121,31 @@
       }
     });
   });
+  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+  function playAll() {
+    document.querySelectorAll("video").forEach(function (v) {
+      v.muted = true;
+      v.loop = true;
+      try {
+        var p = v.play();
+        if (p && typeof p.catch === "function") { p.catch(function () {}); }
+      } catch (err) { /* ignore */ }
+    });
+  }
+  var allBtn = document.getElementById("playall");
+  if (allBtn) {
+    allBtn.addEventListener("click", function () {
+      playAll();
+      allBtn.classList.add("done");
+    });
+  }
+  window.setTimeout(function () {
+    var paused = 0;
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v.paused) { paused += 1; }
+    });
+    if (paused > 0 && allBtn) { allBtn.hidden = false; }
+  }, 2500);
 })();
 </script>
 </body>

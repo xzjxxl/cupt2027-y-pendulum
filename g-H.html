@@ -16,6 +16,7 @@
 <h1>误差与镜头畸变</h1>
 <p class="sub">哪些是摆的物理，哪些只是相机的错</p>
 <p class="intro">径向畸变会改变测得的宽高比、面积和闭合误差，但不会改变真实周期，也不会真的耗散能量。</p>
+<button class="playall" id="playall" type="button" hidden>TAP TO PLAY ALL / 全部播放</button>
 </header>
 <section class="grid clips">
 <article class="card clip-card">
@@ -92,6 +93,31 @@
       }
     });
   });
+  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+  function playAll() {
+    document.querySelectorAll("video").forEach(function (v) {
+      v.muted = true;
+      v.loop = true;
+      try {
+        var p = v.play();
+        if (p && typeof p.catch === "function") { p.catch(function () {}); }
+      } catch (err) { /* ignore */ }
+    });
+  }
+  var allBtn = document.getElementById("playall");
+  if (allBtn) {
+    allBtn.addEventListener("click", function () {
+      playAll();
+      allBtn.classList.add("done");
+    });
+  }
+  window.setTimeout(function () {
+    var paused = 0;
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v.paused) { paused += 1; }
+    });
+    if (paused > 0 && allBtn) { allBtn.hidden = false; }
+  }, 2500);
 })();
 </script>
 </body>

@@ -74,6 +74,31 @@ PAGE_JS = """<script>
       }
     });
   });
+  // Some in-app browsers (WeChat / X5) block autoplay; one tap restarts all.
+  function playAll() {
+    document.querySelectorAll("video").forEach(function (v) {
+      v.muted = true;
+      v.loop = true;
+      try {
+        var p = v.play();
+        if (p && typeof p.catch === "function") { p.catch(function () {}); }
+      } catch (err) { /* ignore */ }
+    });
+  }
+  var allBtn = document.getElementById("playall");
+  if (allBtn) {
+    allBtn.addEventListener("click", function () {
+      playAll();
+      allBtn.classList.add("done");
+    });
+  }
+  window.setTimeout(function () {
+    var paused = 0;
+    document.querySelectorAll("video").forEach(function (v) {
+      if (v.paused) { paused += 1; }
+    });
+    if (paused > 0 && allBtn) { allBtn.hidden = false; }
+  }, 2500);
 })();
 </script>"""
 
@@ -257,14 +282,32 @@ a:focus-visible, button:focus-visible {
 .clip-text p { margin: 0; color: var(--muted); font-size: 14px; }
 
 /* footer */
-.site-footer {
-  margin-top: 26px;
+.site-footer {  margin-top: 26px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 13px;
 }
 .site-footer p { margin: 0; }
+
+/* one-tap play-all (in-app browsers may block autoplay) */
+.playall {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin: 4px 0 18px;
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #0b0d10;
+  background: var(--accent);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.playall[hidden] { display: none; }
+.playall.done { background: #2a323d; color: var(--text); }
 """
 
 
@@ -376,6 +419,8 @@ def build_group(catalog: dict, group: dict) -> str:
         f'<h1>{esc(title)}</h1>',
         f'<p class="sub">{esc(group.get("subtitle", ""))}</p>',
         f'<p class="intro">{esc(group.get("intro", ""))}</p>',
+        ('<button class="playall" id="playall" type="button" hidden>'
+         'TAP TO PLAY ALL / \u5168\u90e8\u64ad\u653e</button>'),
         '</header>',
         '<section class="grid clips">',
         "\n".join(clip_cards),
