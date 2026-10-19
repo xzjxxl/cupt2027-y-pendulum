@@ -8,9 +8,6 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Y形摆 · 鲍迪奇摆 · 三维仿真动画</title>
 <link rel="icon" href="favicon.png" type="image/png">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
 <style>
   .lab-wrap { padding-bottom: 8px; }
   .lab-head h1 { margin: 8px 0 4px; font-size: 26px; line-height: 1.25; }
@@ -33,13 +30,13 @@
     font-size: 12px; color: #8fa0b4; background: rgba(0,0,0,.45);
     padding: 3px 8px; border-radius: 8px; pointer-events: none;
   }
-  .badge {
+  .lab-badge {
     position: absolute; left: 10px; top: 10px; right: 10px;
     font-size: 13px; line-height: 1.4; color: #ff8a8a;
     background: rgba(60,0,0,.55); border: 1px solid #7a2b2b;
     padding: 7px 10px; border-radius: 10px; display: none;
   }
-  .badge.on { display: block; }
+  .lab-badge.on { display: block; }
   .viewbtns {
     position: absolute; right: 8px; top: 8px; display: flex; gap: 6px;
   }
@@ -85,7 +82,9 @@
   .btnrow button:active { transform: scale(.98); }
   .tip { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 10px 0 0; }
   .nolab { padding: 18px; color: #ff8a8a; }
-</style>
+</style><link rel="stylesheet" href="style.css">
+</head>
+<body>
 <main class="wrap">
 <header class="masthead compact">
 <h1>Y形摆 · 鲍迪奇摆 · 三维仿真动画</h1>
@@ -98,7 +97,7 @@
 
 <div class="stage" id="stage">
   <canvas id="c3d"></canvas>
-  <div class="badge" id="warn">⚠ 摆角已超过 23.2°：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
+  <div class="lab-badge" id="warn">⚠ 摆角已超过松绳临界：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
   <div class="viewbtns">
     <button type="button" data-view="iso">斜视</button>
     <button type="button" data-view="front">正视</button>
@@ -167,6 +166,10 @@
 
 <footer class="site-footer"><p>Y 形摆 · 鲍迪奇摆 · 交互实验台 · CUPT 2027 Problem 5</p></footer>
 
+<section class="gallery-head">
+<h2>八个分类</h2>
+<p>22 段动画，按类分组；点进去同类的几段会在同一屏上同时播放。</p>
+</section>
 <nav class="grid groups">
 <a class="card group-card" href="g-A.html"><span class="badge" aria-hidden="true">A</span><span class="group-info"><span class="group-title">装置与几何约束</span><span class="group-sub">两条等长上绳，把结点限制在一段圆弧上</span></span><span class="count">4</span></a>
 <a class="card group-card" href="g-B.html"><span class="badge" aria-hidden="true">B</span><span class="group-info"><span class="group-title">李萨如图形</span><span class="group-sub">频率比决定闭合，初相位决定形态（理想数学示例）</span></span><span class="count">5</span></a>

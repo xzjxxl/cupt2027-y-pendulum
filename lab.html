@@ -29,13 +29,13 @@
     font-size: 12px; color: #8fa0b4; background: rgba(0,0,0,.45);
     padding: 3px 8px; border-radius: 8px; pointer-events: none;
   }
-  .badge {
+  .lab-badge {
     position: absolute; left: 10px; top: 10px; right: 10px;
     font-size: 13px; line-height: 1.4; color: #ff8a8a;
     background: rgba(60,0,0,.55); border: 1px solid #7a2b2b;
     padding: 7px 10px; border-radius: 10px; display: none;
   }
-  .badge.on { display: block; }
+  .lab-badge.on { display: block; }
   .viewbtns {
     position: absolute; right: 8px; top: 8px; display: flex; gap: 6px;
   }
@@ -94,7 +94,7 @@
 
 <div class="stage" id="stage">
   <canvas id="c3d"></canvas>
-  <div class="badge" id="warn">⚠ 摆角已超过 23.2°：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
+  <div class="lab-badge" id="warn">⚠ 摆角已超过松绳临界：一侧上绳张力为零，Y 形约束失效，画面仅为示意。</div>
   <div class="viewbtns">
     <button type="button" data-view="iso">斜视</button>
     <button type="button" data-view="front">正视</button>

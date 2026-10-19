@@ -353,7 +353,7 @@ function refreshReadout() {
   el('o-t2').className = T2 > 0 ? '' : 'warnv';
 
   const over = Math.abs(S.th) / DEG > crit || Math.abs(S.ph) / DEG > crit;
-  document.getElementById('warn').className = over ? 'badge on' : 'badge';
+  document.getElementById('warn').className = over ? 'lab-badge on' : 'lab-badge';
   return { b, h, Tx, Ty };
 }
 
