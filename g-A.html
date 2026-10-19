@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>装置与几何约束 - Y形摆 · 鲍迪奇摆 · 三维仿真动画</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+<nav class="topnav">
+<a class="back" href="index.html">&#8592; HOME</a>
+</nav>
+<header class="page-head">
+<h1>装置与几何约束</h1>
+<p class="sub">Y 形支架、两条等长上绳，与结点被迫走的那段圆弧</p>
+<p class="intro">两段等长上绳把结点钉在半径 h 的圆弧上；这就是两个方向周期不同的全部原因。</p>
+</header>
+<section class="grid clips">
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/a1_apparatus.mp4" poster="video/a1_apparatus.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">d、L、h、l 与坐标系 x（面内）/ y（面外）</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>三维装置总览</h3>
+    <p>d、L、h、l 与坐标系 x（面内）/ y（面外）</p>
+  </div>
+</article>
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/a2_knot_arc.mp4" poster="video/a2_knot_arc.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">h = √(L²−a²)；改 d，圆弧随之升降</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>结点约束圆弧</h3>
+    <p>h = √(L²−a²)；改 d，圆弧随之升降</p>
+  </div>
+</article>
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/a3_two_modes.mp4" poster="video/a3_two_modes.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">面内 l，面外 h+l —— 两个模态同屏对比</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>两个等效摆长</h3>
+    <p>面内 l，面外 h+l —— 两个模态同屏对比</p>
+  </div>
+</article>
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/a4_beta_law.mp4" poster="video/a4_beta_law.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">β = √((h+l)/l)，只依赖长度比；反解得 l = h/(β²−1)</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>频率比定律与反解</h3>
+    <p>β = √((h+l)/l)，只依赖长度比；反解得 l = h/(β²−1)</p>
+  </div>
+</article>
+</section>
+<footer class="site-footer"><p>Y形摆 · 鲍迪奇摆 · 三维仿真动画 &middot; CUPT 2027 Problem 5</p></footer>
+</main>
+
+
+<script>
+(function () {
+  "use strict";
+  function markMissing(card) {
+    if (card) { card.classList.add("missing"); }
+  }
+  var cards = document.querySelectorAll(".card");
+  cards.forEach(function (card) {
+    var video = card.querySelector("video");
+    if (!video) { return; }
+    video.addEventListener("error", function () { markMissing(card); });
+    var posterUrl = video.getAttribute("poster");
+    if (posterUrl) {
+      var probe = new Image();
+      probe.addEventListener("error", function () { markMissing(card); });
+      probe.src = posterUrl;
+    }
+    window.setTimeout(function () {
+      if (video.readyState === 0) { markMissing(card); }
+    }, 4000);
+  });
+  var buttons = document.querySelectorAll(".fs");
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var card = btn.closest(".card");
+      var video = card ? card.querySelector("video") : null;
+      if (!video) { return; }
+      try {
+        if (typeof video.requestFullscreen === "function") {
+          var pending = video.requestFullscreen();
+          if (pending && typeof pending.catch === "function") {
+            pending.catch(function () { return; });
+          }
+        } else if (typeof video.webkitEnterFullscreen === "function") {
+          video.webkitEnterFullscreen();
+        }
+      } catch (err) {
+        return;
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

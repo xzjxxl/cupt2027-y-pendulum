@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>大摆角与松绳 - Y形摆 · 鲍迪奇摆 · 三维仿真动画</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+<nav class="topnav">
+<a class="back" href="index.html">&#8592; HOME</a>
+</nav>
+<header class="page-head">
+<h1>大摆角与松绳</h1>
+<p class="sub">23.2° 那道坎：Y 形约束失效的一瞬间</p>
+<p class="intro">摆角一大，两个方向频率各自漂移，图形开始畸变；再大，一侧上绳先松，约束整个失效。</p>
+</header>
+<section class="grid clips">
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/c1_amp.mp4" poster="video/c1_amp.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">真解非线性方程，不是叠加正弦</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>2° 与 15° 的真实轨迹</h3>
+    <p>真解非线性方程，不是叠加正弦</p>
+  </div>
+</article>
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/c2_slack.mp4" poster="video/c2_slack.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">θ 扫到 arctan(a/h) = 23.2°，单侧张力归零</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>松绳临界撞线</h3>
+    <p>θ 扫到 arctan(a/h) = 23.2°，单侧张力归零</p>
+  </div>
+</article>
+<article class="card clip-card">
+  <div class="player">
+    <video src="video/c3_tension.mp4" poster="video/c3_tension.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <button class="fs" type="button" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V5h5M15 5h5v5M20 15v4h-5M9 19H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="placeholder">
+      <p class="placeholder-label">MEDIA NOT FOUND</p>
+      <p class="placeholder-note">T₁、T₂ 随面内摆角变化</p>
+    </div>
+  </div>
+  <div class="clip-text">
+    <h3>两条上绳的张力</h3>
+    <p>T₁、T₂ 随面内摆角变化</p>
+  </div>
+</article>
+</section>
+<footer class="site-footer"><p>Y形摆 · 鲍迪奇摆 · 三维仿真动画 &middot; CUPT 2027 Problem 5</p></footer>
+</main>
+
+
+<script>
+(function () {
+  "use strict";
+  function markMissing(card) {
+    if (card) { card.classList.add("missing"); }
+  }
+  var cards = document.querySelectorAll(".card");
+  cards.forEach(function (card) {
+    var video = card.querySelector("video");
+    if (!video) { return; }
+    video.addEventListener("error", function () { markMissing(card); });
+    var posterUrl = video.getAttribute("poster");
+    if (posterUrl) {
+      var probe = new Image();
+      probe.addEventListener("error", function () { markMissing(card); });
+      probe.src = posterUrl;
+    }
+    window.setTimeout(function () {
+      if (video.readyState === 0) { markMissing(card); }
+    }, 4000);
+  });
+  var buttons = document.querySelectorAll(".fs");
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var card = btn.closest(".card");
+      var video = card ? card.querySelector("video") : null;
+      if (!video) { return; }
+      try {
+        if (typeof video.requestFullscreen === "function") {
+          var pending = video.requestFullscreen();
+          if (pending && typeof pending.catch === "function") {
+            pending.catch(function () { return; });
+          }
+        } else if (typeof video.webkitEnterFullscreen === "function") {
+          video.webkitEnterFullscreen();
+        }
+      } catch (err) {
+        return;
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
