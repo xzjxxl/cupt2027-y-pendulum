@@ -14,6 +14,8 @@
   .lab-head p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
   .stage {
     position: relative;
+    z-index: 0;
+    isolation: isolate;
     width: 100%;
     height: 56vh;
     min-height: 300px;
@@ -22,9 +24,9 @@
     border-radius: 14px;
     overflow: hidden;
     background: #000;
-    touch-action: none;
   }
-  #c3d { display: block; width: 100%; height: 100%; }
+  #c3d { display: block; width: 100%; height: 100%;
+         touch-action: none; cursor: grab; }
   .hint {
     position: absolute; left: 10px; bottom: 8px;
     font-size: 12px; color: #8fa0b4; background: rgba(0,0,0,.45);
@@ -169,6 +171,9 @@
 <section class="gallery-head">
 <h2>八个分类</h2>
 <p>22 段动画，按类分组；点进去同类的几段会在同一屏上同时播放。</p>
+<p class="quicknav">
+<a href="g-A.html">A 装置与几何约束</a> · <a href="g-B.html">B 李萨如图形</a> · <a href="g-C.html">C 大摆角与松绳</a> · <a href="g-D.html">D 悬点间距扫描</a> · <a href="g-E.html">E 阻尼与图形演化</a> · <a href="g-F.html">F 自转与装配扰动</a> · <a href="g-G.html">G 调距机构</a> · <a href="g-H.html">H 误差与镜头畸变</a>
+</p>
 </section>
 <nav class="grid groups">
 <a class="card group-card" href="g-A.html"><span class="badge" aria-hidden="true">A</span><span class="group-info"><span class="group-title">装置与几何约束</span><span class="group-sub">两条等长上绳，把结点限制在一段圆弧上</span></span><span class="count">4</span></a>

@@ -223,10 +223,13 @@ function applyCam() {
 (function bindOrbit() {
   let down = false, lx = 0, ly = 0, pid = null, pinch = 0;
   const pts = new Map();
+  // 只在真正拖动后才捕获指针，并且一定要释放：
+  // 微信 X5 / WKWebView 里长期持有 pointer capture 会把后续点击吃掉。
+  let capId = null;
   stage.addEventListener('pointerdown', (e) => {
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pts.size === 1) { down = true; lx = e.clientX; ly = e.clientY; }
-    stage.setPointerCapture(e.pointerId);
+    // 延迟到 move 再 capture，单击不改变指针归属
   });
   stage.addEventListener('pointermove', (e) => {
     if (!pts.has(e.pointerId)) return;
@@ -243,6 +246,11 @@ function applyCam() {
     }
     if (!down) return;
     const dx = e.clientX - lx, dy = e.clientY - ly;
+    // 触摸输入一律不捕获：X5/WKWebView 里捕获会吃掉后续点击
+    if (e.pointerType !== 'touch' && capId !== e.pointerId &&
+        (Math.abs(dx) + Math.abs(dy)) > 3) {
+      try { stage.setPointerCapture(e.pointerId); capId = e.pointerId; } catch (_) {}
+    }
     lx = e.clientX; ly = e.clientY;
     orb.theta -= dx * 0.008;
     orb.phi = Math.min(168 * DEG, Math.max(6 * DEG, orb.phi - dy * 0.006));
@@ -252,9 +260,24 @@ function applyCam() {
     pts.delete(e.pointerId);
     if (pts.size < 2) pinch = 0;
     if (pts.size === 0) down = false;
+    if (capId !== null && capId === e.pointerId) {
+      try { stage.releasePointerCapture(capId); } catch (_) {}
+      capId = null;
+    }
   };
   stage.addEventListener('pointerup', up);
   stage.addEventListener('pointercancel', up);
+  stage.addEventListener('lostpointercapture', (e) => {
+    if (capId === e.pointerId) capId = null;
+  });
+  // 兜底：手指离开窗口时也要清干净
+  window.addEventListener('blur', () => {
+    if (capId !== null) {
+      try { stage.releasePointerCapture(capId); } catch (_) {}
+      capId = null;
+    }
+    down = false; pts.clear(); pinch = 0;
+  });
   stage.addEventListener('wheel', (e) => {
     e.preventDefault();
     orb.r = Math.min(5.0, Math.max(0.35, orb.r * (1 + Math.sign(e.deltaY) * 0.08)));

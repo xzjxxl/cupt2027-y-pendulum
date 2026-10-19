@@ -463,11 +463,16 @@ body {
   letter-spacing: .01em;
   -webkit-font-smoothing: antialiased;
 }
-html, body { overflow-x: hidden; max-width: 100%; }
+html { max-width: 100%; }
+body { overflow-x: hidden; max-width: 100%; }
 /* 安全网：flex/grid 子项的 min-content 宽度是横向溢出的常见来源 */
 * { min-width: 0; }
 img, video, canvas { max-width: 100%; }
 .wrap, .readout, .grid, .card, .clip-card { max-width: 100%; }
+a, button { touch-action: manipulation; -webkit-tap-highlight-color:
+  rgba(53,199,216,.18); }
+.card { position: relative; z-index: 10; cursor: pointer; }
+.card > * { pointer-events: none; }
 
 .wrap {
   width: 100%;
@@ -501,6 +506,18 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.28; }
   content: ""; width: 18px; height: 1px; background: var(--accent-a);
 }
 .gallery-head p { margin: 0; color: var(--faint); font-size: var(--t-sm); }
+.quicknav {
+  margin-top: var(--s3) !important;
+  display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3);
+  font-size: var(--t-xs) !important;
+}
+.quicknav a {
+  color: var(--muted); text-decoration: none;
+  border-bottom: 1px solid var(--line-2); padding-bottom: 1px;
+}
+.quicknav a:hover, .quicknav a:active {
+  color: var(--accent-a); border-color: var(--accent-a);
+}
 
 /* —— 卡片：抬升 + 细边 + 悬停微位移 —— */
 .grid.groups {
@@ -594,7 +611,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.28; }
   font-size: var(--t-xs); line-height: 1.6; }
 
 /* —— 实验台：栅格与控件在小屏不再溢出 —— */
-.stage { border-radius: var(--r-lg); border-color: var(--line); }
+.stage { position: relative; z-index: 0; border-radius: var(--r-lg);
+  border-color: var(--line); }
 @media (max-width: 560px) { .stage { height: 46vh; min-height: 260px; } }
 
 .readout {
@@ -782,6 +800,12 @@ def build_index(catalog: dict) -> str:
         '<h2>八个分类</h2>',
         f'<p>{sum(len(g.get("clips", [])) for g in catalog.get("groups", []))}'
         ' 段动画，按类分组；点进去同类的几段会在同一屏上同时播放。</p>',
+        '<p class="quicknav">',
+        ' · '.join(
+            f'<a href="g-{esc(safe_code(str(g.get("code", ""))))}.html">'
+            f'{esc(g.get("code", ""))} {esc(g.get("title", ""))}</a>'
+            for g in catalog.get("groups", [])),
+        '</p>',
         '</section>',
         '<nav class="grid groups">',
         "\n".join(cards),
