@@ -704,6 +704,31 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.28; }
     transition-duration: .001ms !important;
   }
 }
+
+/* ============================================================ 水印 */
+.wm-layer {
+  position: fixed; inset: 0; z-index: 9998;
+  pointer-events: none; user-select: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27300%27%20height%3D%27200%27%3E%3Ctext%20x%3D%276%27%20y%3D%27120%27%20font-size%3D%2721%27%20font-family%3D%27sans-serif%27%20fill%3D%27%23ffffff%27%20fill-opacity%3D%270.9%27%20transform%3D%27rotate%28-27%206%20120%29%27%3E25%E7%BB%84%20%C2%B7%20%E7%AC%AC5%E9%A2%98%3C%2Ftext%3E%3C%2Fsvg%3E");
+  background-repeat: repeat;
+  background-size: 300px 200px;
+  opacity: .055;
+}
+.wm-tag {
+  position: fixed; right: 10px; bottom: 8px; z-index: 9999;
+  pointer-events: none; user-select: none;
+  font: 600 11px/1.4 var(--sans, system-ui);
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.30);
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+.wm-stage {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  z-index: 4; pointer-events: none;
+  font: 600 11px/1 var(--sans, system-ui);
+  letter-spacing: .1em; color: rgba(255,255,255,.22);
+}
+@media print { .wm-layer { opacity: .10; } }
 """
 
 
@@ -722,6 +747,10 @@ def safe_code(code) -> str:
     return cleaned or "x"
 
 
+WM_HTML = ('<div class="wm-layer" aria-hidden="true"></div>'
+           '<div class="wm-tag">25组 · 第5题</div>')
+
+
 def page(title: str, body: str, script: str = "", head_extra: str = "") -> str:
     script_html = ("\n" + script + "\n") if script else "\n"
     return f"""<!DOCTYPE html>
@@ -738,7 +767,8 @@ def page(title: str, body: str, script: str = "", head_extra: str = "") -> str:
 </head>
 <body>
 {body}
-{script_html}</body>
+{script_html}{WM_HTML}
+</body>
 </html>
 """
 
