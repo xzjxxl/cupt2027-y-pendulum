@@ -483,6 +483,11 @@ document.querySelectorAll('[data-preset]').forEach((b) => {
     } else if (k === 'crit') {              // 越过 38.6 度松绳临界
       setSlider('s-d', 39.95); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 42); setSlider('s-ph', 2);
+    } else if (k === 'rich') {
+      // 复现实拍那种"铺满的花瓣"：比例只差一点点，轨迹才不闭合、
+      // 一圈圈往外挪，把整个椭圆填成网状
+      setSlider('s-d', 40.35); setSlider('s-L', 32); setSlider('s-l', 20);
+      setSlider('s-th', 17); setSlider('s-ph', 17);
     } else if (k === 'irr') {               // beta = sqrt(2)
       setSlider('s-d', 49.96); setSlider('s-L', 32); setSlider('s-l', 20);
       setSlider('s-th', 9); setSlider('s-ph', 9);
