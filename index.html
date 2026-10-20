@@ -123,8 +123,8 @@
   <div><span>T 面外</span><b id="o-ty">—</b></div>
   <div><span>公共周期</span><b id="o-tc">—</b></div>
   <div><span>松绳临界</span><b id="o-crit">—</b></div>
-  <div><span>上绳 T1（准静态）</span><b id="o-t1">—</b></div>
-  <div><span>上绳 T2（准静态）</span><b id="o-t2">—</b></div>
+  <div><span>上绳 T1（模型值）</span><b id="o-t1">—</b></div>
+  <div><span>上绳 T2（模型值）</span><b id="o-t2">—</b></div>
 </div>
 
 <div class="btnrow">
@@ -170,7 +170,7 @@
 
 <p class="tip">
   默认是 3:2 设计点：d = 39.95 cm、L = 32.00 cm、l = 20.00 cm，得 h = 25.00 cm、β = 1.5。
-      张力按三绳张紧模型实时计算：θ 是下绳相对「中点→结点」径向的偏角，φ 是上方 Y 形平面绕横梁的转角；<br>T3 = m[g·cosθ·cosφ + l·θ̇² + R·cosθ·φ̇²]，两条上绳 T = (L·T3/2)(cosθ/h ± sinθ/a)。<br>三条绳任一归零，张紧模型即失效——画面就地暂停并提示，不再用旧方程继续演示。</p>
+      张力按三绳张紧模型实时计算（均为模型值，不是力传感器实测）：θ 是下绳相对「中点→结点」径向的偏角，φ 是上方 Y 形平面绕横梁的转角；<br>T3 = m[g·cosθ·cosφ + l·θ̇² + R·cosθ·φ̇²]，两条上绳 T = (L·T3/2)(cosθ/h ± sinθ/a)。<br>三条绳任一归零，张紧模型即失效——画面就地暂停并提示，不再用旧方程继续演示。</p>
 
 <footer class="site-footer"><p>Y 形摆 · 鲍迪奇摆 · 交互实验台 · CUPT 2027 Problem 5</p></footer>
 

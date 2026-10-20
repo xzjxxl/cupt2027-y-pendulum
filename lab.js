@@ -414,10 +414,9 @@ function refreshReadout() {
   const b = betaOf(h, P.l);
   const [Tx, Ty] = periods(h, P.l);
   const crit = thetaCrit(h, P.d) / DEG;
-  // 纯面内准静态张力：T3 = m g cos(theta)。
-// 注意：把 T3 换成含向心项的 m(g cosθ + lθ̇²) 只改变张力大小，
-// 不改变一侧上绳归零的临界角（|tanθ| = a/h）。
-// 且该式只适用于纯面内；二维耦合运动的张力需另行推导。
+  // 三绳张紧模型（理想、全张紧）的瞬时张力：
+  // T3 含 θ、φ 的向心项；T1/T2 由无质量结点力平衡给出。
+  // 这里只是模型计算值，不是力传感器实测；任一绳张力归零时模型失效。
   const ten = tensions(S.th, S.ph, S.thd, S.phd, h, P.l, P.d);
   const T1 = ten.T1, T2 = ten.T2, T3 = ten.T3;
   const [btxt, exact] = ratioText(b);
