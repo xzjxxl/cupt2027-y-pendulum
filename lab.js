@@ -8,8 +8,8 @@ const BOB_M = 0.040;          // 摆球质量 / kg
 const DEG = Math.PI / 180;
 
 // ------------------------------------------------------------------ 物理
-const P = { d: 0.39950, L: 0.320, l: 0.200, gam: 0.03,
-            th0: 9, ph0: 9 };
+const P = { d: 0.43500, L: 0.320, l: 0.200, gam: 0.03,
+            th0: 15, ph0: 15 };
 const S = { th: 0, ph: 0, thd: 0, phd: 0, t: 0, running: true };
 
 const hOf = (L, d) => Math.sqrt(Math.max(L * L - (d / 2) ** 2, 1e-9));
@@ -537,7 +537,7 @@ let frameCount = 0;
   if (!el || !btn) return;
   const g = el.getContext('2d');
   const pts = [];
-  let on = false;
+  let on = true;   // 一进场就展示李萨如图
 
   function size() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -553,8 +553,14 @@ let frameCount = 0;
     const hh = hOf(P.L, P.d), l = P.l;
     // 关键：经典李萨如图是「水平面俯视」x–y，不是侧视 x–z。
     // 侧视时摆球上下只动 1 cm，会被压成一条扁带。
-    const xm = Math.max(l, (hh + l) * 0.62) * 1.18;
-    const sc = Math.min(w, h) / (2 * xm) * 0.94;
+    // 按已积累的点自动铺满画面（图形小时放大，铺开后自动收敛）
+    let mx = 1e-6, my = 1e-6;
+    for (let i = 0; i < pts.length; i++) {
+      const ax = Math.abs(pts[i][0]), ay = Math.abs(pts[i][1]);
+      if (ax > mx) mx = ax;
+      if (ay > my) my = ay;
+    }
+    const sc = Math.min(w / (2 * mx * 1.12), h / (2 * my * 1.12));
     const cx = w / 2, cy = h / 2;
 
     // 十字参考
@@ -587,12 +593,18 @@ let frameCount = 0;
     g.fillText('轨迹投影 · 水平面俯视 x–y', 14 * dpr, 20 * dpr);
   }
 
-  btn.addEventListener('click', () => {
-    on = !on;
+  function apply() {
     el.style.display = on ? 'block' : 'none';
     canvas.style.visibility = on ? 'hidden' : 'visible';
     btn.classList.toggle('on', on);
     if (on) { size(); }
+  }
+  apply();
+
+  btn.addEventListener('click', () => {
+    on = !on;
+    el.style.display = on ? 'block' : 'none';
+    apply();
   });
   window.addEventListener('resize', () => { if (on) size(); });
   window.__projTick = function () {
