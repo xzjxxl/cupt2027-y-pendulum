@@ -8,8 +8,8 @@ const BOB_M = 0.040;          // 摆球质量 / kg
 const DEG = Math.PI / 180;
 
 // ------------------------------------------------------------------ 物理
-const P = { d: 0.43500, L: 0.320, l: 0.200, gam: 0.03,
-            th0: 15, ph0: 15 };
+const P = { d: 0.39950, L: 0.320, l: 0.200, gam: 0.03,
+            th0: 9, ph0: 9 };
 const S = { th: 0, ph: 0, thd: 0, phd: 0, t: 0, running: true };
 
 const hOf = (L, d) => Math.sqrt(Math.max(L * L - (d / 2) ** 2, 1e-9));
@@ -537,7 +537,7 @@ let frameCount = 0;
   if (!el || !btn) return;
   const g = el.getContext('2d');
   const pts = [];
-  let on = true;   // 一进场就展示李萨如图
+  let on = false;
 
   function size() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
